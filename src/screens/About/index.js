@@ -17,7 +17,9 @@ const About = () => {
 
     return (
         <div className={cn("container", styles.container)}>
-            {data.length > 0 && parse(data[0].content)}
+            <div className={cn("content")}>
+                {data.length > 0 && parse(data[0].content)}
+            </div>
         </div>
     )
 }

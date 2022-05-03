@@ -43,30 +43,33 @@ function App() {
 
   return (
     <Router>
-      <Header />
-      <Switch>
-        <Route exact path="/" render={() => <Home />} />
-        <Route exact path="/about" render={() => <About />} />
-        <Route exact path="/charity" render={() => <Charity />} />
-        <Route exact path="/dashboard" render={() => (
-          Object.keys(auth).length > 0 && auth.address !== 'undefined' && auth.role === "admin" ?
-            <Dashboard />
-            :
-            <Home />
-        )}
-        />
-        <Route exact path="/connect-wallet" render={() => <ConnectWallet />} />
-        <Route exact path="/collection/:id" render={() => <Collection />} />
-        <Route exact path="/create" render={() => <CreateItem />} />
-        <Route exact path="/create-details" render={() => (
-          Object.keys(auth).length > 0 && auth.address !== 'undefined' && auth.role === "admin" ?
-            <CreateDetails />
-            :
-            <Home />
-        )}
-        />
-      </Switch>
-      <Footer />
+      <div className="main">
+        <Header />
+        <Switch>
+          <Route exact path="/" render={() => <Home />} />
+          <Route exact path="/about" render={() => <About />} />
+          <Route exact path="/charity" render={() => <Charity />} />
+          <Route exact path="/dashboard" render={() => (
+            Object.keys(auth).length > 0 && auth.address !== 'undefined' && auth.role === "admin" ?
+              <Dashboard />
+              :
+              <Home />
+          )}
+          />
+          <Route exact path="/connect-wallet" render={() => <ConnectWallet />} />
+          <Route exact path="/collection/:id" render={() => <Collection />} />
+          <Route exact path="/create" render={() => <CreateItem />} />
+          <Route exact path="/create-details" render={() => (
+            Object.keys(auth).length > 0 && auth.address !== 'undefined' && auth.role === "admin" ?
+              <CreateDetails />
+              :
+              <Home />
+          )}
+          />
+        </Switch>
+        <Footer />
+      </div>
+      
     </Router>
   );
 }
