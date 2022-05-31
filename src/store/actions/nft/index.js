@@ -39,10 +39,10 @@ export const updateNFT = async (data) => {
     return response.data;
 };
 
-export const getNFTs = (collectionId) => (dispatch) => {
+export const getNFTs = (collectionAddress) => (dispatch) => {
     let requestUrl = `${REACT_APP_API_URL}/api/nfts`;
-    if (collectionId) {
-        requestUrl += `?collectionId=${collectionId}`;
+    if (collectionAddress) {
+        requestUrl += `?collectionAddress=${collectionAddress}`;
     }
     axios.get(requestUrl)
         .then(response => {

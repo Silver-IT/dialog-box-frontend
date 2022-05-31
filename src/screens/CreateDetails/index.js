@@ -44,13 +44,10 @@ const CreateDetails = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [royalty, setRoyalty] = useState(royaltiesOptions[0].name);
-  const [price, setPrice] = useState(0);
   const [property, setProperty] = useState("");
-  const [collectionId, setCollectionId] = useState(0);
+  const [collectionAddress, setCollectionAddress] = useState(0);
   const [collections, setCollections] = useState([]);
 
-  const [idForSale, setIdForSale] = useState(0);
-  const [isMinted, setIsMinted] = useState(false);
   const [isClickedCreateItem, setIsClickedCreateItem] = useState(false);
 
   const auth = useSelector(state => state.authReducer.data);
@@ -91,18 +88,6 @@ const CreateDetails = () => {
       formIsValid = false;
       toast.warn("Description is required!", toastOptions);
     }
-    if (price === 0) {
-      formIsValid = false;
-      toast.warn("Price is required!", toastOptions);
-    }
-    if (price && !price.match(/^\s*[+-]?(\d+|\d*\.\d+|\d+\.\d*)([Ee][+-]?\d+)?\s*$/)) {
-      formIsValid = false;
-      toast.warn("Price must be number!", toastOptions);
-    }
-    if (price < 0) {
-      formIsValid = false;
-      toast.warn("Price must be greater than zero!", toastOptions);
-    }
     if (!property) {
       formIsValid = false;
       toast.warn("Property is required!", toastOptions);
@@ -114,68 +99,46 @@ const CreateDetails = () => {
     if (collectionData.length > 0) {
       var array = [];
       collectionData.map(item => {
-        array.push({ id: item.collectionId, name: item.title });
+        array.push({ id: item.address, name: item.title });
       });
       setCollections(array);
     }
   }, [collectionData]);
 
   useEffect(() => {
-    let col_id = collectionData.filter(item => item.title === property)[0]?.collectionId;
-    setCollectionId(col_id);
+    let col_address = collectionData.filter(item => item.title === property)[0]?.address;
+    setCollectionAddress(col_address);
   }, [property]);
-
-  useEffect(() => {
-    if (isMinted && idForSale) {
-      const nftData = {
-        url: imageUrl,
-        idForSale: idForSale,
-        collectionId: collectionId,
-        name: name,
-        owner: auth.address,
-        description: description,
-        royalty: royalty,
-        price: price,
-        property: property,
-        onSale: true
-      }
-      dispatch(Actions.saveNFT(nftData));
-    }
-  }, [isMinted, idForSale]);
 
   const mintNewNFT = async () => {
     if (formValidation()) {
       setIsClickedCreateItem(true);
       try {
-        const data = {
-          nft: imageUrl,
-          collectionId: collectionId,
+
+        const metadata = {
+          image: imageUrl,
           name: name,
-          owner: auth.address,
           description: description,
-          royalty: royalty,
-          price: price,
-          property: property,
-          onSale: true
+          attributes: {}
         }
-        const uri = JSON.stringify(data);
-        let toWei = web3.utils.toWei(price, 'ether');
-        const gas = await _Contract.methods.mint(toWei, uri).estimateGas('', { from: auth.address });
-        const result = await _Contract.methods
-          .mint(toWei, uri).send({ from: auth.address, gas: gas });
 
-        toast.success("Minted Successfully!", toastOptions);
-  
-        const tokenId = result.events.ItemAddedForSale.returnValues.tokenId;
+        const nftData = {
+          metadata_id: web3.utils.randomHex(32),
+          token_id: "",
+          collection_address: collectionAddress,
+          royalty_fraction: royalty * 100,
+          created_at: Date.now(),
+          metadata: JSON.stringify(metadata)
+        }
 
-        setIdForSale(tokenId);
-        setIsMinted(true);
+        dispatch(Actions.saveNFT(nftData));
+        toast.success("Saved Successfully!", toastOptions);
         setIsClickedCreateItem(false);
+
       } catch (error) {
         toast.error(error.message, toastOptions);
-        await Actions.removeImage(imageUrl);
+        Actions.removeImage(imageUrl);
         setImageUrl("");
-        toast.success("Removed Image successfully!", toastOptions);
         setIsClickedCreateItem(false);
       }
     }
@@ -261,18 +224,6 @@ const CreateDetails = () => {
                           options={royaltiesOptions}
                         />
                       </div>
-                    </div>
-                    <div className={styles.col}>
-                      <TextInput
-                        className={styles.field}
-                        label="Price"
-                        name="Price"
-                        type="number"
-                        placeholder="e. g. Price"
-                        onChange={(e) => setPrice(e.target.value)}
-                        value={price}
-                        required
-                      />
                     </div>
                     <div className={styles.col}>
                       <div className={styles.field}>

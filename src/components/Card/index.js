@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import * as Actions from "../../store/actions";
 import { useDispatch, useSelector } from "react-redux";
 import Web3 from "web3";
-import { _Contract } from "../../utils/_contract";
 import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -13,6 +12,7 @@ import Loader from "../Loader";
 
 import SlickArrow from "../../components/SlickArrow";
 import Icon from "../../components/Icon";
+import artTokenContractABI from "../../config/abis/artToken.json";
 
 const web3 = new Web3(Web3.givenProvider);
 
@@ -23,10 +23,24 @@ const Card = ({ className, item , data , index}) => {
     const [open, setOpen] = useState(false);
     const [isClickedBuyItem, setIsClickedBuyItem] = useState(false);
     const [openedMediaIndex, setOpenedMediaIndex] = useState(0);
+    const [price, setPrice] = useState("")
+    const [isMInted, setIsMinted] = useState(null)
 
     const scrollRef = useRef(null);
 
     const auth = useSelector(state => state.authReducer.data);
+
+    const _Contract = new web3.eth.Contract(
+        artTokenContractABI.abi,
+        item.collection_address
+    );
+
+    useEffect( async () => {
+        let weiPrice = await _Contract.methods.MINT_PRICE().call()
+        let number = Web3.utils.fromWei(weiPrice, 'ether');
+        setPrice(number);
+        setIsMinted(item.token_id);
+    }, []);
 
     useEffect(() => {
         open ? disableBodyScroll(scrollRef) : enableBodyScroll(scrollRef);
@@ -34,60 +48,73 @@ const Card = ({ className, item , data , index}) => {
     }, [open]);
 
     const buyNFT = async (data) => {
-        if (data.owner !== auth.address) {
+        // if (data.owner !== auth.address) {
             setIsClickedBuyItem(true);
             try {
-                const tokenId = data.idForSale;
-                const price = data.price;
-                let toWei = web3.utils.toWei(price, 'ether');
-                await _Contract.methods
-                    .buyItem(tokenId)
-                    .send({ from: auth.address, value: toWei, gas: 250000 })
-                let res = await Actions.updateNFT({ tokenId: tokenId, buyer: auth.address });
-                if (res) {
-                    toast.success("Success!", toastOptions);
-                } else {
-                    toast.error("Some went wrong!", toastOptions);
-                }
+
+                _Contract.events.TokenMinted().on('data', (event) => {
+                    console.log(`token minted: ${event.returnValues._tokenId} , ${event.returnValues._metadataId}`);
+                    updateNFT(event.returnValues._tokenId, event.returnValues._metadataId);
+                })
+
+                await _Contract.methods.publicMint(data.metadata_id, data.royalty_fraction)
+                                        .send({ from: auth.address, value: Web3.utils.toWei(price, 'ether')})
+
                 setIsClickedBuyItem(false);
+
             } catch (error) {
                 console.log(error, "===error");
                 toast.info(error, toastOptions);
                 setIsClickedBuyItem(false);
             }
-        } else {
-            toast.info("There are no NFTs to buy in this collection!", toastOptions);
-        }
     };
 
+    const updateNFT = async (tokenId, metadataId) => {
+
+        let res = await Actions.updateNFT({ token_id: tokenId, metadata_id: metadataId });
+        if (res) {
+            setIsMinted(tokenId);
+            toast.success("Success!", toastOptions);
+        } else {
+            toast.error("Some went wrong!", toastOptions);
+        }
+
+    }
+
     return (
-        <>
+        <React.Fragment>
             <div className={cn(styles.card, className)}>
                 {/* <div className={styles.preview}> */}
                 <div className={styles.card_body}>
                     <div
-                        style={{ backgroundImage: `url(${process.env.REACT_APP_API_URL}/${item.url})` }}
+                        style={{ backgroundImage: `url(${process.env.REACT_APP_API_URL}/${JSON.parse(item.metadata).image})` }}
                         className={styles.card_image}
                         onClick={() => setOpen(true)}
                     />
                 </div>
                 <div className={styles.line}>
-                    {
-                        item.onSale
+                   
+                    <div>
+                        {
+                            isMInted == null
                             ?
-                            isClickedBuyItem ?
-                                <button
-                                    disabled
-                                    className={cn("button", styles.button)}
-                                    type="button"
-                                >
-                                    <Loader className={styles.loader}  />
-                                </button>
+                                isClickedBuyItem 
+                                ?
+                                    <button
+                                        disabled
+                                        className={cn("button", styles.button)}
+                                        type="button"
+                                    >
+                                        <Loader className={styles.loader}  />
+                                    </button>
                                 :
-                                <button className={cn("button-small btn-font btn-buy")} onClick={() => buyNFT(item)}>Buy</button>
+                                <button className={cn("button-small btn-font btn-buy")} onClick={() => buyNFT(item)}>Mint</button>
                             :
-                            <button className={cn("button-stroke button-small disabled btn-font btn-sold")}>Sold</button>
-                    }
+                            <button className={cn("button-stroke button-small disabled btn-font btn-sold")}>Minted</button>
+                        }
+                    </div>
+                    <div className={styles.price}>${price}</div>
+                    
                 </div>
                 <ToastContainer />
                 {/* </div> */}
@@ -107,7 +134,7 @@ const Card = ({ className, item , data , index}) => {
                                     <Icon name="arrow-prev" size="30" />
                                 </SlickArrow>
                                 
-                                <img className={styles.modal_content} src={`${process.env.REACT_APP_API_URL}/${data[openedMediaIndex].url}`} />
+                                <img className={styles.modal_content} src={`${process.env.REACT_APP_API_URL}/${JSON.parse(data[openedMediaIndex].metadata).image}`} />
                                 
                                 <SlickArrow 
                                     className={styles.btn_next}
@@ -123,7 +150,7 @@ const Card = ({ className, item , data , index}) => {
                     </div>
                 ) : null
             }
-        </>
+        </React.Fragment>
     );
 };
 

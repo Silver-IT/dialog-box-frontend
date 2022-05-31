@@ -10,6 +10,8 @@ import Dropzone from "react-dropzone";
 import Icon from "../../../components/Icon";
 import styles from "./Collection.module.sass";
 import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
+import Web3 from "web3";
+import tokenManagerContractABI from "../../../config/abis/artTokenManager.json";
 
 const Collection = () => {
 
@@ -23,9 +25,16 @@ const Collection = () => {
     const [collectionId, setCollectionId] = useState("");
     const [imageUrl, setImageUrl] = useState("");
     const [file, setFile] = useState(null);
+
     const [title, setTitle] = useState("");
-    // const [token, setToken] = useState("");
-    // const [marketplace, setMarketplace] = useState("");
+    const [symbol, setSymbol] = useState("");
+    const [initBaseURI, setInitBaseURI] = useState(process.env.REACT_APP_API_URL + '/token/');
+    const [maxSupply , setMaxSupply] = useState("");
+    const [mintPrice , setMintPrice] = useState("");
+
+    const [isAddingCollection, setIsAddingCollection] = useState(false);
+
+    const auth = useSelector(state => state.authReducer.data);
 
     const collections = useSelector(state => state.collectionReducer.data);
 
@@ -61,36 +70,57 @@ const Collection = () => {
         setFile(null);
     };
 
-    const save = async () => {
-        if (imageUrl && title) {
-            let data = {};
-            let result = false;
-            data.title = title;
-            data.img = imageUrl;
-            // data.tokenAddress = token;
-            // data.marketplaceAddress = marketplace;
-            if (collectionId) {
-                data.collectionId = collectionId;
-                result = await Actions.updateCollection(data);
-            } else {
-                result = await Actions.saveCollection(data);
-            }
-            if (result) {
-                dispatch(Actions.getCollections());
-                if (collectionId) {
-                    toast.success("Updated successfully!", toastOptions);
-                } else {
-                    toast.success("Added successfully!", toastOptions);
-                }
-                setVisibleModal(false);
-            } else {
-                toast.error("Something went wrong!", toastOptions);
-                setVisibleModal(false);
-            }
-        } else {
-            toast.error("Fill in all fields completely!", toastOptions);
+    const save = () => {
+
+        if (!imageUrl || !title || !symbol || !initBaseURI || !maxSupply || !mintPrice) {
+            toast.error("Please input all fields!", toastOptions);
+            return;
         }
+
+        setVisibleModal(false);
+
+        const web3 = new Web3(Web3.givenProvider);
+        web3.eth.transactionBlockTimeout = 1000;
+
+        const _Contract = new web3.eth.Contract(
+            tokenManagerContractABI.abi,
+            process.env.REACT_APP_TOKENMANAGER_CONTRACT_ADDRESS
+        );
+
+        let toWei = web3.utils.toWei(mintPrice, 'ether');
+        _Contract.methods.deployCollection(title, symbol, initBaseURI, imageUrl, maxSupply, toWei)
+                                .send({ from: auth.address});
+        
+        _Contract.events.CollectionAdded().on('data', (event) => {
+            console.log(`collection deployed: ${event.returnValues._addr}`);
+            saveCollection(event.returnValues._addr);
+        })
+
     };
+
+    const saveCollection = async (address) => {
+
+        let data = {};
+        
+        data.title = title;
+        data.symbol = symbol;
+        data.initBaseURI = initBaseURI;
+        data.initLogoURI = imageUrl;
+        data.maxSupply = maxSupply;
+        data.mintPrice = mintPrice;
+        data.address = address;
+    
+        let result = false;
+        result = await Actions.saveCollection(data);
+
+        if (result) {
+            dispatch(Actions.getCollections());
+            toast.success("Added successfully!", toastOptions);
+        } else {
+            toast.error("Something went wrong!", toastOptions);
+        }
+
+    }
 
     const cancel = () => {
         setVisibleModal(false);
@@ -149,7 +179,7 @@ const Collection = () => {
                 collections.map((item, index) => (
                     <div className={styles.collection_card} key={index}>
                         <div className={styles.column}>
-                            <img src={`${process.env.REACT_APP_API_URL}/${item.img}`} className={styles.collection_img} />
+                            <img src={`${process.env.REACT_APP_API_URL}/${item.init_logo_uri}`} className={styles.collection_img} />
                         </div>
                         <div className={styles.column}>
                             {/* <p>Title</p> */}
@@ -158,10 +188,11 @@ const Collection = () => {
                             {/* <h5>{item.tokenAddress}</h5> */}
                             {/* <p>Marketplace Address</p> */}
                             {/* <h5>{item.marketplaceAddress}</h5> */}
-                            <div className={styles.car_btns}>
+
+                            {/* <div className={styles.car_btns}>
                                 <button className={cn("button-small button-stroke")} onClick={() => update(item)}>Update</button>
                                 <button className={cn("button-small")} disabled onClick={() => deleteModal(item)}>Delete</button>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 ))
@@ -214,11 +245,47 @@ const Collection = () => {
                             <div className={styles.fieldset}>
                                 <TextInput
                                     className={styles.field}
-                                    label="Collection Name"
-                                    name="Title"
+                                    label="Name"
+                                    name="Name"
                                     type="text"
                                     onChange={(e) => setTitle(e.target.value)}
                                     value={title}
+                                    required
+                                />
+                                <TextInput
+                                    className={styles.field}
+                                    label="Symbol"
+                                    name="Symbol"
+                                    type="text"
+                                    onChange={(e) => setSymbol(e.target.value)}
+                                    value={symbol}
+                                    required
+                                />
+                                <TextInput
+                                    className={styles.field}
+                                    label="initBaseURI"
+                                    name="initBaseURI"
+                                    type="text"
+                                    onChange={(e) => setInitBaseURI(e.target.value)}
+                                    value={initBaseURI}
+                                    required
+                                />
+                                <TextInput
+                                    className={styles.field}
+                                    label="max Supply"
+                                    name="max Supply"
+                                    type="text"
+                                    onChange={(e) => setMaxSupply(e.target.value)}
+                                    value={maxSupply}
+                                    required
+                                />
+                                <TextInput
+                                    className={styles.field}
+                                    label="mint Price"
+                                    name="mint Price"
+                                    type="text"
+                                    onChange={(e) => setMintPrice(e.target.value)}
+                                    value={mintPrice}
                                     required
                                 />
                                 {/* <TextInput
@@ -240,12 +307,15 @@ const Collection = () => {
                                     required
                                 /> */}
                                 <div className={styles.modal_btns}>
+
                                     <button
                                         className={cn("button-small", styles.update_btn)}
                                         onClick={save}
+                                        disabled={isAddingCollection}
                                     >
                                         Save
                                     </button>
+                 
                                     <button
                                         className={cn("button-small button-stroke")}
                                         onClick={cancel}

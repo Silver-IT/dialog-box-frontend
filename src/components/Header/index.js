@@ -6,6 +6,8 @@ import cn from "classnames";
 import styles from "./Header.module.sass";
 import Icon from "../Icon";
 import Image from "../Image";
+import Web3 from "web3";
+import tokenManagerContractABI from "../../config/abis/artTokenManager.json";
 
 const openseaIcon = "/images/icons/opensea.svg";
 
@@ -23,7 +25,9 @@ const Headers = () => {
   const collections = useSelector(state => state.collectionReducer.data);
 
   useEffect(() => {
+
     dispatch(Actions.getCollections());
+
     if (typeof window.ethereum !== 'undefined') {
       window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
         console.log("eth_accounts:", accounts);
@@ -84,7 +88,7 @@ const Headers = () => {
               </div>
               <div className={styles.dropdown_content}>
                 {collections.length > 0 && collections.map((item, index) => {
-                  return <Link key={index} to={{ pathname: `/collection/${item.collectionId}` }} className={styles.dropdown_content_item} onClick={() => { setVisibleNav(false) }}> {item.title} </Link>
+                  return <Link key={index} to={{ pathname: `/collection/${item.address}` }} className={styles.dropdown_content_item} onClick={() => { setVisibleNav(false) }}> {item.title} </Link>
                 })}
               </div>
             </div>
@@ -160,12 +164,12 @@ const Headers = () => {
         <ul className={styles.social}>
           <li>
             <a href="https://twitter.com/dialogboxNFT" target="_blank">
-              <Icon name="twitter" fill="#E9ECEF" size={30} viewBoxAttribute = "0 0 17 17" />
+              <Icon name="twitter" fill="#DADDE0" size={30} viewBoxAttribute = "0 0 17 17" />
             </a>
           </li>
           <li>
             <a href="https://www.instagram.com/dialogbox_nft/" target="_blank">
-              <Icon name="instagram" fill="#E9ECEF" size={30} viewBoxAttribute = "0 0 17 17" />
+              <Icon name="instagram" fill="#DADDE0" size={30} viewBoxAttribute = "0 0 17 17" />
             </a>
           </li>
           <li>

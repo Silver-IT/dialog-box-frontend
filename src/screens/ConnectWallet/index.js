@@ -61,15 +61,6 @@ const Connect = () => {
             </div>
 
           </div>
-          {/* <div className={styles.wrapper}>
-            <div className={styles.bg}>
-              <img
-                srcSet="/images/content/connect-bg@2x.jpg 2x"
-                src="/images/content/connect-bg.jpg"
-                alt="Connect wallet"
-              />
-            </div>
-          </div> */}
         </div>
       </div>
       <ToastContainer />

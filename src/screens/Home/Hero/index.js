@@ -50,7 +50,7 @@ const Hero = () => {
                       <div className={styles.btns}>
                         <Link
                           className={cn("button", styles.button)}
-                          to={`/collection/${item.collectionId}`}
+                          to={`/collection/${item.address}`}
                         >
                           Open Gallery
                         </Link>

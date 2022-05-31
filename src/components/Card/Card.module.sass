@@ -37,16 +37,20 @@
     transition: all 0.6s
     &:hover
         cursor: pointer
-        transform: scale(1.5)
-        transition: all 2.6s
+        transform: scale(1.25)
+        transition: all 2.0s
 
 .line
-    text-align: center
-    padding-top: 7%
-    &:first-child
-        margin-bottom: 12px
-    &:nth-child(2)
-        margin-top: auto
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    margin-top: 10px;
+
+.price
+    position: absolute;
+    right: 0px;
+    top: 7px;
 
 .title
     margin-right: auto

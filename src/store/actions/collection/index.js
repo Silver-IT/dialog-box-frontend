@@ -1,8 +1,12 @@
 import axios from 'axios';
 import { GET_COLLECTIONS } from "../../types";
+import Web3 from "web3";
+import tokenManagerContractABI from "../../../config/abis/artTokenManager.json";
+
 const { REACT_APP_API_URL } = process.env;
 
-export const getCollections = () => (dispatch) => {
+export const getCollections = () => async (dispatch) => {
+
     axios
         .get(`${REACT_APP_API_URL}/api/collections`)
         .then(response => {
@@ -13,6 +17,7 @@ export const getCollections = () => (dispatch) => {
                 }
             })
         })
+
 };
 
 export const uploadCollectionImage = async (formData) => {

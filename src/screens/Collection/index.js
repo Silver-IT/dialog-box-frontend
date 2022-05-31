@@ -8,16 +8,16 @@ import * as Actions from "../../store/actions";
 
 const Collection = () => {
 
-    const collectionId = useParams().id;
+    const collectionAddress = useParams().id;
     const dispatch = useDispatch();
 
     const data = useSelector(state => state.nftReducer.data);
 
     useEffect(() => {
-        if (collectionId) {
-            dispatch(Actions.getNFTs(collectionId));
+        if (collectionAddress) {
+            dispatch(Actions.getNFTs(collectionAddress));
         }
-    }, [collectionId]);
+    }, [collectionAddress]);
 
     return (
         <div className={cn("section", styles.section)} >
@@ -25,7 +25,7 @@ const Collection = () => {
                 <div className={styles.list}>
                     <div className={styles.grid}>
                         {
-                            collectionId && data.length > 0 && data[0].collectionId === collectionId ? 
+                            collectionAddress && data.length > 0 && data[0].collection_address === collectionAddress ? 
                             data.map((item, index) => {
                                 return <Card 
                                     key={index}
