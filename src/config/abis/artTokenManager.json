@@ -90,7 +90,7 @@
             "type": "address"
           }
         ],
-        "name": "addAddress",
+        "name": "addCollection",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -106,25 +106,6 @@
         "name": "authorizeAddress",
         "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "address",
-            "name": "",
-            "type": "address"
-          }
-        ],
-        "name": "authorizedAddresses",
-        "outputs": [
-          {
-            "internalType": "bool",
-            "name": "",
-            "type": "bool"
-          }
-        ],
-        "stateMutability": "view",
         "type": "function"
       },
       {
@@ -167,7 +148,20 @@
       },
       {
         "inputs": [],
-        "name": "getAllAddresses",
+        "name": "getAllAuthorizedAddresses",
+        "outputs": [
+          {
+            "internalType": "address[]",
+            "name": "",
+            "type": "address[]"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "getAllCollections",
         "outputs": [
           {
             "internalType": "address[]",
@@ -186,7 +180,26 @@
             "type": "address"
           }
         ],
-        "name": "isRegisteredAddress",
+        "name": "isAuthorizedUser",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "isRegisteredCollection",
         "outputs": [
           {
             "internalType": "bool",

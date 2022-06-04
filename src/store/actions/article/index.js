@@ -1,6 +1,6 @@
 import axios from "axios";
 import { GET_ABOUTUS, GET_CHARITY } from "../../types";
-const { REACT_APP_API_URL } = process.env;
+import { REACT_APP_API_URL }from "../../../utils/constants"
 
 export const uploadTinyMCEImage = async (formData) => {
     try {

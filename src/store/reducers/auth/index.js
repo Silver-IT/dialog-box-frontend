@@ -1,10 +1,14 @@
 import { GET_AUTH } from "../../types";
 
 const INITIAL_STATE = {
-    data: {}
+    data: {
+        authAddress: null,
+        accountType: null
+    }
 };
 
 export const authReducer = (state = INITIAL_STATE, action) => {
+    
     switch (action.type) {
         case GET_AUTH:
             return {

@@ -8,33 +8,14 @@ import { toastOptions } from "../../utils/toast";
 import cn from "classnames";
 import styles from "./ConnectWallet.module.sass";
 import Icon from "../../components/Icon";
+import {connectMetaMask} from "../../utils/connectMetaMask.js"
 
 const Connect = () => {
 
   const dispatch = useDispatch();
 
-  const connectMetaMask = async () => {
-    if (typeof window.ethereum !== 'undefined') {
-      window.ethereum.request({ method: 'eth_requestAccounts' })
-        .then(accounts => {
-          if (accounts.length > 0) {
-            toast.success("Wallet connected Successfully!", toastOptions);
-            const address = accounts[0].toUpperCase();
-            dispatch(Actions.getAuth(address));
-          }
-        })
-        .catch((err) => {
-          if (err.code === 4001) {
-            // EIP-1193 userRejectedRequest error
-            // If this happens, the user rejected the connection request.
-            toast.error("Please connect to MetaMask!", toastOptions);
-          } else {
-            toast.error(err.message, toastOptions);
-          }
-        });
-    } else {
-      toast.error("Please install MetaMask!", toastOptions);
-    }
+  const connectMetaMaskFunc = async () => {
+    connectMetaMask(dispatch);
   }
 
   return (
@@ -49,7 +30,7 @@ const Connect = () => {
         <div className={styles.body}>
           <div className={styles.menu}>
 
-            <div className={cn(styles.link)} onClick={connectMetaMask}>
+            <div className={cn(styles.link)} onClick={connectMetaMaskFunc}>
               <div className={styles.icon} style={{ backgroundColor: "#9757D7" }}>
                 <Icon name="wallet" size="24" />
                 <Icon name="check" size="18" fill={"#9757D7"} />

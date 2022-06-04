@@ -16,6 +16,7 @@ import { toastOptions } from "../../../utils/toast";
 import cn from "classnames";
 import styles from "./Admin.module.sass";
 import Modal from "../../../components/Modal";
+import { ACCOUNT_TYPE } from "../../../utils/constants";
 
 const Admin = () => {
 
@@ -25,65 +26,75 @@ const Admin = () => {
     const [visibleModal, setVisibleModal] = useState(false);
 
     const admins = useSelector(state => state.adminReducer.data);
-
+    const auth = useSelector(state => state.authReducer.data);
+    
     useEffect(() => {
-        dispatch(Actions.getAllAdmins());
+        Actions.getAllAdmins(dispatch);
     }, []);
 
-    const addNewWallet = async () => {
+    const addNewAddress = async () => {
         if (address) {
-            let res = await Actions.saveAdmin(address);
-            if (res) {
-                toast.success("A new admin is added successfully!", toastOptions);
-            } else {
-                toast.error("Something went wrong!", toastOptions);
+            let res = await Actions.addAdmin(auth, address);
+            if (res instanceof Error) {
+                toast.success(res.message, toastOptions);
+            }else{
+                toast.success("Saved successfully", toastOptions);
             }
             setVisibleModal(false);
         } else {
-            toast.error("Please input wallet address!", toastOptions);
+            toast.error("Please input admin address!", toastOptions);
         }
         setAddress("");
-        dispatch(Actions.getAllAdmins());
+        Actions.getAllAdmins(dispatch);
     };
 
     const deleteAddress = async (address) => {
-        let res = await Actions.delAdmin(address);
-        if (res) {
-            toast.success("An admin is deleted successfully!", toastOptions);
-        } else {
-            toast.error("Something went wrong!", toastOptions);
+        let res = await Actions.delAdmin(auth, address);
+        if (res instanceof Error) {
+            toast.success(res.message, toastOptions);
+        }else{
+            toast.success("Deleted successfully", toastOptions);
         }
-        dispatch(Actions.getAllAdmins());
+        Actions.getAllAdmins(dispatch);
     }
 
     return (
         <div className={styles.table_container}>
-            <div className={styles.btn_position}>
-                <button
-                    className={cn("button-small")}
-                    onClick={() => setVisibleModal(true)}
-                >
-                    Add
-                </button>
-            </div>
+            {
+                auth.accountType == ACCOUNT_TYPE.OWNER ?
+                    <div className={styles.btn_position}>
+                        <button
+                            className={cn("button-small")}
+                            onClick={() => setVisibleModal(true)}
+                        >
+                            Add
+                        </button>
+                    </div>
+                : null
+            }
+            
             <div>
                 <TableContainer component={Paper}>
                     <Table sx={{ minWidth: 450 }} aria-label="simple table">
                         <TableBody>
-                            {admins.map((row) => (
+                            {admins.map((row, index) => (
                                 <TableRow
-                                    key={row._id}
+                                    key={index}
                                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                 >
-                                    <TableCell align="left">{row.admin}</TableCell>
-                                    <TableCell align="center">
-                                        <p 
-                                            className={styles.del_txt}
-                                            onClick={() => deleteAddress(row.admin)}
-                                        >
-                                            DELETE
-                                        </p>
-                                    </TableCell>
+                                    <TableCell align="left">{row}</TableCell>
+                                    {
+                                    auth.accountType == ACCOUNT_TYPE.OWNER ? 
+                                        <TableCell align="center">
+                                            <p 
+                                                className={styles.del_txt}
+                                                onClick={() => deleteAddress(row)}
+                                            >
+                                                DELETE
+                                            </p>
+                                        </TableCell>
+                                    : null
+                                    }   
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -103,7 +114,7 @@ const Admin = () => {
                 <div style={{ display: "flex", justifyContent: "flex-end" }}>
                     <button
                         className={cn("button-small")}
-                        onClick={addNewWallet}
+                        onClick={addNewAddress}
                     >
                         Add
                     </button>

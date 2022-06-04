@@ -12,6 +12,12 @@ import styles from "./Collection.module.sass";
 import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
 import Web3 from "web3";
 import tokenManagerContractABI from "../../../config/abis/artTokenManager.json";
+import { REACT_APP_API_URL }from "../../../utils/constants"
+
+function useForceUpdate() {
+    const [value, setValue] = useState(0);
+    return () => setValue((value) => value + 1);
+}
 
 const Collection = () => {
 
@@ -21,30 +27,21 @@ const Collection = () => {
     const scrollRef = useRef();
 
     const [visibleModal, setVisibleModal] = useState(false);
-    const [visibleDelModal, setVisibleDelModal] = useState(false);
-    const [collectionId, setCollectionId] = useState("");
     const [imageUrl, setImageUrl] = useState("");
     const [file, setFile] = useState(null);
 
     const [title, setTitle] = useState("");
     const [symbol, setSymbol] = useState("");
-    const [initBaseURI, setInitBaseURI] = useState(process.env.REACT_APP_API_URL + '/token/');
+    const [initBaseURI, setInitBaseURI] = useState(REACT_APP_API_URL + '/token/');
     const [maxSupply , setMaxSupply] = useState("");
     const [mintPrice , setMintPrice] = useState("");
 
-    const [isAddingCollection, setIsAddingCollection] = useState(false);
-
     const auth = useSelector(state => state.authReducer.data);
-
     const collections = useSelector(state => state.collectionReducer.data);
-
+    
     useEffect(() => {
-        dispatch(Actions.getCollections());
+        Actions.getCollections(dispatch);
     }, []);
-
-    useEffect(() => {
-        (visibleModal || visibleDelModal) ? disableBodyScroll(scrollRef) : enableBodyScroll(scrollRef);
-    }, [visibleModal, visibleDelModal]);
 
     const onDrop = async (files) => {
         try {
@@ -70,7 +67,7 @@ const Collection = () => {
         setFile(null);
     };
 
-    const save = () => {
+    const save = async () => {
 
         if (!imageUrl || !title || !symbol || !initBaseURI || !maxSupply || !mintPrice) {
             toast.error("Please input all fields!", toastOptions);
@@ -87,85 +84,32 @@ const Collection = () => {
             process.env.REACT_APP_TOKENMANAGER_CONTRACT_ADDRESS
         );
 
-        let toWei = web3.utils.toWei(mintPrice, 'ether');
-        _Contract.methods.deployCollection(title, symbol, initBaseURI, imageUrl, maxSupply, toWei)
-                                .send({ from: auth.address});
-        
-        _Contract.events.CollectionAdded().on('data', (event) => {
-            console.log(`collection deployed: ${event.returnValues._addr}`);
-            saveCollection(event.returnValues._addr);
-        })
-
-    };
-
-    const saveCollection = async (address) => {
-
-        let data = {};
-        
-        data.title = title;
-        data.symbol = symbol;
-        data.initBaseURI = initBaseURI;
-        data.initLogoURI = imageUrl;
-        data.maxSupply = maxSupply;
-        data.mintPrice = mintPrice;
-        data.address = address;
-    
-        let result = false;
-        result = await Actions.saveCollection(data);
-
-        if (result) {
-            dispatch(Actions.getCollections());
-            toast.success("Added successfully!", toastOptions);
-        } else {
-            toast.error("Something went wrong!", toastOptions);
+        let collection = {
+            title: title,
+            symbol: symbol,
+            init_logo_uri: imageUrl,
+            init_base_uri: initBaseURI,
+            mint_price: mintPrice,
+            max_supply: maxSupply
         }
 
-    }
+        let res = await Actions.deployCollection(collection, auth);
+
+        if (res instanceof Error){
+            toast.error(res.message, toastOptions);
+        }else{
+            Actions.addNewCollection(collection, dispatch);
+            toast.success("Saved Successfully!", toastOptions);
+        }
+    
+    };
 
     const cancel = () => {
         setVisibleModal(false);
-        setCollectionId("");
-        setImageUrl("");
-        setTitle("");
-        // setToken("");
-        // setMarketplace("");
-    };
-
-    const update = (data) => {
-        setVisibleModal(true);
-        setCollectionId(data.collectionId);
-        setImageUrl(data.img);
-        setTitle(data.title);
-        // setToken(data.tokenAddress);
-        // setMarketplace(data.marketplaceAddress);
-    };
-
-    const deleteModal = (data) => {
-        setVisibleDelModal(true);
-        setImageUrl(data.img);
-        setCollectionId(data.collectionId);
-    };
-
-    const deleteItem = async () => {
-        Actions.removeImage(imageUrl);
-        let res = await Actions.deleteCollection(collectionId);
-        if (res) {
-            dispatch(Actions.getCollections());
-            toast.success("Deleted successfully!", toastOptions);
-            setVisibleDelModal(false);
-            setImageUrl("");
-            setCollectionId("");
-        } else {
-            toast.error("Something went wrong!", toastOptions);
-        }
-    };
-
-    const cancelDelete = () => {
-        setVisibleDelModal(false);
-        setCollectionId("");
     };
 
     return (
+
         <div className={styles.table_container}>
             <div className={styles.btn_position}>
                 <button
@@ -179,20 +123,10 @@ const Collection = () => {
                 collections.map((item, index) => (
                     <div className={styles.collection_card} key={index}>
                         <div className={styles.column}>
-                            <img src={`${process.env.REACT_APP_API_URL}/${item.init_logo_uri}`} className={styles.collection_img} />
+                            <img src={`${REACT_APP_API_URL}/${item.init_logo_uri}`} className={styles.collection_img} />
                         </div>
                         <div className={styles.column}>
-                            {/* <p>Title</p> */}
                             <div className={cn("h4", styles.title_size)}>{item.title}</div>
-                            {/* <p>Token Address</p> */}
-                            {/* <h5>{item.tokenAddress}</h5> */}
-                            {/* <p>Marketplace Address</p> */}
-                            {/* <h5>{item.marketplaceAddress}</h5> */}
-
-                            {/* <div className={styles.car_btns}>
-                                <button className={cn("button-small button-stroke")} onClick={() => update(item)}>Update</button>
-                                <button className={cn("button-small")} disabled onClick={() => deleteModal(item)}>Delete</button>
-                            </div> */}
                         </div>
                     </div>
                 ))
@@ -211,7 +145,7 @@ const Collection = () => {
                             <div>
                                 {imageUrl ?
                                     <div className={styles.preview_}>
-                                        <div className={styles.preview_img} style={{ backgroundImage: `url(${process.env.REACT_APP_API_URL}/${imageUrl})` }}>
+                                        <div className={styles.preview_img} style={{ backgroundImage: `url(${REACT_APP_API_URL}/${imageUrl})` }}>
                                             <div className={styles.close_img} onClick={removeImage}>
                                                 <Icon name="close" size="25" />
                                             </div>
@@ -288,30 +222,11 @@ const Collection = () => {
                                     value={mintPrice}
                                     required
                                 />
-                                {/* <TextInput
-                                    className={styles.field}
-                                    label="Token Address"
-                                    name="Token"
-                                    type="text"
-                                    onChange={(e) => setToken(e.target.value)}
-                                    value={token}
-                                    required
-                                />
-                                <TextInput
-                                    className={styles.field}
-                                    label="Marketplace Address"
-                                    name="Marketplace"
-                                    type="text"
-                                    onChange={(e) => setMarketplace(e.target.value)}
-                                    value={marketplace}
-                                    required
-                                /> */}
                                 <div className={styles.modal_btns}>
 
                                     <button
                                         className={cn("button-small", styles.update_btn)}
                                         onClick={save}
-                                        disabled={isAddingCollection}
                                     >
                                         Save
                                     </button>
@@ -324,18 +239,6 @@ const Collection = () => {
                                     </button>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            }
-            {
-                visibleDelModal &&
-                <div className={styles.add_modal} ref={scrollRef}>
-                    <div className={styles.del_modal_content}>
-                        <h4>Do you want to delete this collection?</h4>
-                        <div className={styles.del_btn_position}>
-                            <button className={cn("button-small")} onClick={deleteItem}>Yes</button>
-                            <button className={cn("button-small button-stroke")} onClick={cancelDelete}>No</button>
                         </div>
                     </div>
                 </div>

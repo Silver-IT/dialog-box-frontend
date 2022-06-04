@@ -1,6 +1,6 @@
 import axios from "axios";
 import { SAVE_NEW_NFT, GET_NFTS } from "../../types";
-const { REACT_APP_API_URL } = process.env;
+import { REACT_APP_API_URL } from "../../../utils/constants.js"
 
 export const uploadImage = async (formData) => {
     try {
@@ -32,11 +32,6 @@ export const saveNFT = (data) => (dispatch) => {
                 })
             }
         })
-};
-
-export const updateNFT = async (data) => {
-    let response = await axios.put(`${REACT_APP_API_URL}/api/nft`, data);
-    return response.data;
 };
 
 export const getNFTs = (collectionAddress) => (dispatch) => {

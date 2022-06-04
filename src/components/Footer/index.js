@@ -52,9 +52,9 @@ const Footers = () => {
           </div>
           <div className={styles.faq}>FAQ</div>
           <div className={styles.faq}>Terms and Conditions</div>
-          <div className={styles.note}>
+          {/* <div className={styles.note}>
             We use cookies for better service. <a href="/#">Accept</a>
-          </div>
+          </div> */}
         </div>
       </div>
     </footer>

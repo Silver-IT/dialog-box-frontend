@@ -13,32 +13,35 @@ import ConnectWallet from "./screens/ConnectWallet";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Dashboard from "./screens/Dashboard";
+import {connectMetaMask, checkAccountType} from "./utils/connectMetaMask.js"
+import {ACCOUNT_TYPE} from "./utils/constants"
 
 function App() {
 
-  const dispatch = useDispatch();
-
   const auth = useSelector(state => state.authReducer.data);
+  const dispatch = useDispatch();
   
   useEffect(() => {
-    if (typeof window.ethereum !== 'undefined') {
-      window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
-        console.log("eth_accounts:", accounts);
-        if (accounts.length > 0) {
-          const address = accounts[0].toUpperCase();
-          dispatch(Actions.getAuth(address));
-        }
-      })
-      window.ethereum.on('accountsChanged', function (accounts) {
-        console.log("accountsChanged:", accounts);
-        if (accounts.length === 0) {
-          dispatch(Actions.getAuth());
-        } else {
-          const address = accounts[0].toUpperCase();
-          dispatch(Actions.getAuth(address));
-        }
-      })
-    }
+
+    connectMetaMask(dispatch);
+
+    window.ethereum.on('accountsChanged', function (accounts) {
+      if (accounts.length > 0) {
+        console.log("account changed");
+        const address = accounts[0];
+        checkAccountType(address, dispatch);
+      }else{
+        checkAccountType(null, dispatch);
+      }
+    })
+
+    window.ethereum.on('chainChanged', (chainId) => {
+      // Handle the new chain.
+      // Correctly handling chain changes can be complicated.
+      // We recommend reloading the page unless you have good reason not to.
+      window.location.reload();
+    });
+
   }, []);
 
   return (
@@ -50,20 +53,20 @@ function App() {
           <Route exact path="/about" render={() => <About />} />
           <Route exact path="/charity" render={() => <Charity />} />
           <Route exact path="/dashboard" render={() => (
-            Object.keys(auth).length > 0 && auth.address !== 'undefined' && auth.role === "admin" ?
-              <Dashboard />
+              auth.accountType == ACCOUNT_TYPE.ADMIN || auth.accountType == ACCOUNT_TYPE.OWNER ?
+                <Dashboard />
               :
-              <Home />
+                <Home />
           )}
           />
           <Route exact path="/connect-wallet" render={() => <ConnectWallet />} />
           <Route exact path="/collection/:id" render={() => <Collection />} />
           <Route exact path="/create" render={() => <CreateItem />} />
           <Route exact path="/create-details" render={() => (
-            Object.keys(auth).length > 0 && auth.address !== 'undefined' && auth.role === "admin" ?
-              <CreateDetails />
+              auth.accountType == ACCOUNT_TYPE.ADMIN || auth.accountType == ACCOUNT_TYPE.OWNER ?
+                <CreateDetails />
               :
-              <Home />
+                <Home />
           )}
           />
         </Switch>

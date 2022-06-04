@@ -1,26 +1,36 @@
 import axios from "axios";
 import { GET_ALL_ADMINS } from "../../types";
-const { REACT_APP_API_URL } = process.env;
+import Web3 from "web3";
+import { toast } from "react-toastify";
+import { toastOptions } from "../../../utils/toast";
+import tokenManagerContractABI from "../../../config/abis/artTokenManager.json";
 
-export const getAllAdmins = () => (dispatch) => {
-    axios
-        .get(`${REACT_APP_API_URL}/api/admins`)
-        .then(response => {
-            dispatch({
-                type: GET_ALL_ADMINS,
-                payload: {
-                    data: response.data.data
-                }
-            });
+const web3 = new Web3(Web3.givenProvider);
+const _Contract = new web3.eth.Contract(
+    tokenManagerContractABI.abi,
+    process.env.REACT_APP_TOKENMANAGER_CONTRACT_ADDRESS
+);
+
+export const getAllAdmins = async (dispatch) => {
+    let res = await _Contract.methods.getAllAuthorizedAddresses().call();
+    if(res){
+        dispatch({
+            type: GET_ALL_ADMINS,
+            payload: {
+                data: res
+            }
         });
+    }  
 };
 
-export const saveAdmin = async (address) => {
-    let res = await axios.post(`${REACT_APP_API_URL}/api/admin`, { address: address });
-    return res.data;
+export const addAdmin = async (auth, address) => {
+    await _Contract.methods.authorizeAddress(address).send({from: auth.authAddress}, function(err, transactionHash) {
+        return err;
+    })
 };
 
-export const delAdmin = async (address) => {
-    let res = await axios.delete(`${REACT_APP_API_URL}/api/admin?address=${address}`);
-    return res.data;
+export const delAdmin = async (auth, address) => {
+    await _Contract.methods.unauthorizeAddress(address).send({from: auth.authAddress}, function(err, transactionHash) {
+        return err;
+    })
 }

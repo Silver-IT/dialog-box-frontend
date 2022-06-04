@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { toastOptions } from "../../../utils/toast";
 import cn from "classnames";
 import styles from "./Aboutus.module.sass";
+import { REACT_APP_API_URL } from "../../../utils/constants.js"
 
 const Aboutus = () => {
 
@@ -75,7 +76,7 @@ const Aboutus = () => {
                         let formData = new FormData();
                         formData.append('file', blobInfo.blob(), blobInfo.filename());
                         let url = await Actions.uploadTinyMCEImage(formData);
-                        success(`${process.env.REACT_APP_API_URL}/${url}`);
+                        success(`${REACT_APP_API_URL}/${url}`);
                     }
                 }}
                 // onKeyDown={removeImage}

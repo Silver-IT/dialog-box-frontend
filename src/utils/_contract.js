@@ -1,8 +1,5 @@
 import Web3 from "web3";
 import artTokenContractABI from "../config/abis/artToken.json";
-import * as Actions from "../store/actions";
-import { ToastContainer, toast } from "react-toastify";
-import { toastOptions } from "./toast";
 require('dotenv').config();
 
 const web3 = new Web3(Web3.givenProvider);

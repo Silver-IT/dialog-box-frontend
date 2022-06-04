@@ -10,7 +10,7 @@ const reducers = combineReducers({
     collectionReducer,
     nftReducer,
     articleReducer,
-    adminReducer,
+    adminReducer
 });
 
 export default reducers;

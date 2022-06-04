@@ -6,8 +6,8 @@ import cn from "classnames";
 import styles from "./Header.module.sass";
 import Icon from "../Icon";
 import Image from "../Image";
-import Web3 from "web3";
-import tokenManagerContractABI from "../../config/abis/artTokenManager.json";
+import {connectMetaMask} from "../../utils/connectMetaMask.js"
+import { ACCOUNT_TYPE } from "../../utils/constants";
 
 const openseaIcon = "/images/icons/opensea.svg";
 
@@ -17,39 +17,15 @@ const Headers = () => {
 
   const [visibleNav, setVisibleNav] = useState(false);
   const [visibleCollectionsNav, setVisibleCollectionsNav] = useState(false);
-  const [state, setState] = useState(false);
 
-  console.log("connection state:", state);
-
-  const auth = useSelector(state => state.authReducer.data);
   const collections = useSelector(state => state.collectionReducer.data);
-
+  const auth = useSelector(state => state.authReducer.data);
+  
   useEffect(() => {
 
-    dispatch(Actions.getCollections());
+    connectMetaMask(dispatch);
+    Actions.getCollections(dispatch);
 
-    if (typeof window.ethereum !== 'undefined') {
-      window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
-        console.log("eth_accounts:", accounts);
-        if (accounts.length > 0) {
-          const address = accounts[0].toUpperCase();
-          dispatch(Actions.getAuth(address));
-          setState(true);
-        } else {
-          setState(false);
-        }
-      })
-      window.ethereum.on('accountsChanged', function (accounts) {
-        console.log("accountsChanged:", accounts);
-        if (accounts.length === 0) {
-          setState(false);
-        } else {
-          const address = accounts[0].toUpperCase();
-          dispatch(Actions.getAuth(address));
-          setState(true);
-        }
-      })
-    }
   }, []);
 
   const setVisableNavBar = () => {
@@ -60,6 +36,7 @@ const Headers = () => {
   };
 
   return (
+    
     <header className={styles.header}>
       <div className={cn("container", styles.container)}>
         <Link className={styles.logo} to="/" onClick={() => { setVisibleNav(false) }}>
@@ -99,9 +76,9 @@ const Headers = () => {
               Charity
             </Link>
             {
-              state && Object.keys(auth).length > 0 && auth.address !== 'undefined'
+              auth.authAddress
                 ?
-                auth.role === "admin"
+                auth.accountType == ACCOUNT_TYPE.ADMIN || auth.accountType == ACCOUNT_TYPE.OWNER
                   ?
                   <>
                     <Link className={styles.link} to="/dashboard" onClick={() => { setVisibleNav(false) }}>
@@ -148,9 +125,9 @@ const Headers = () => {
           </nav>
         </div>
         {
-          state && Object.keys(auth).length > 0 && auth.address !== 'undefined'
+          auth.authAddress
             ?
-            auth.role === "admin"
+            auth.accountType == ACCOUNT_TYPE.ADMIN || auth.accountType == ACCOUNT_TYPE.OWNER
               ?
               <>
                 <Link className={cn("button-stroke button-small", styles.button)} to="/dashboard" onClick={setVisableNavBar}>Dashboard</Link>

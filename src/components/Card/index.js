@@ -13,6 +13,7 @@ import Loader from "../Loader";
 import SlickArrow from "../../components/SlickArrow";
 import Icon from "../../components/Icon";
 import artTokenContractABI from "../../config/abis/artToken.json";
+import { REACT_APP_API_URL }from "../../utils/constants"
 
 const web3 = new Web3(Web3.givenProvider);
 
@@ -23,8 +24,8 @@ const Card = ({ className, item , data , index}) => {
     const [open, setOpen] = useState(false);
     const [isClickedBuyItem, setIsClickedBuyItem] = useState(false);
     const [openedMediaIndex, setOpenedMediaIndex] = useState(0);
-    const [price, setPrice] = useState("")
-    const [isMInted, setIsMinted] = useState(null)
+    const [price, setPrice] = useState()
+    const [isMInted, setIsMinted] = useState(false)
 
     const scrollRef = useRef(null);
 
@@ -39,7 +40,12 @@ const Card = ({ className, item , data , index}) => {
         let weiPrice = await _Contract.methods.MINT_PRICE().call()
         let number = Web3.utils.fromWei(weiPrice, 'ether');
         setPrice(number);
-        setIsMinted(item.token_id);
+        if(item.token_id == null){
+            setIsMinted(false);
+        }else{
+            setIsMinted(true);
+        }
+        
     }, []);
 
     useEffect(() => {
@@ -48,38 +54,26 @@ const Card = ({ className, item , data , index}) => {
     }, [open]);
 
     const buyNFT = async (data) => {
-        // if (data.owner !== auth.address) {
-            setIsClickedBuyItem(true);
-            try {
+        setIsClickedBuyItem(true);
+        try {
 
-                _Contract.events.TokenMinted().on('data', (event) => {
-                    console.log(`token minted: ${event.returnValues._tokenId} , ${event.returnValues._metadataId}`);
-                    updateNFT(event.returnValues._tokenId, event.returnValues._metadataId);
+            _Contract.methods.publicMint(data.metadata_id, data.royalty_fraction)
+                .send({ from: auth.authAddress, value: Web3.utils.toWei(price, 'ether')}, function(err, transactionHash) {
+                    if (!err){
+                        setIsMinted(true);
+                        toast.success("Success!", toastOptions);
+                    }else{
+                        toast.error(err.message, toastOptions);
+                    }
+                    setIsClickedBuyItem(false);
                 })
 
-                await _Contract.methods.publicMint(data.metadata_id, data.royalty_fraction)
-                                        .send({ from: auth.address, value: Web3.utils.toWei(price, 'ether')})
-
-                setIsClickedBuyItem(false);
-
-            } catch (error) {
-                console.log(error, "===error");
-                toast.info(error, toastOptions);
-                setIsClickedBuyItem(false);
-            }
-    };
-
-    const updateNFT = async (tokenId, metadataId) => {
-
-        let res = await Actions.updateNFT({ token_id: tokenId, metadata_id: metadataId });
-        if (res) {
-            setIsMinted(tokenId);
-            toast.success("Success!", toastOptions);
-        } else {
-            toast.error("Some went wrong!", toastOptions);
+        } catch (error) {
+            console.log(error, "===error");
+            toast.info(error, toastOptions);
+            setIsClickedBuyItem(false);
         }
-
-    }
+    };
 
     return (
         <React.Fragment>
@@ -87,7 +81,7 @@ const Card = ({ className, item , data , index}) => {
                 {/* <div className={styles.preview}> */}
                 <div className={styles.card_body}>
                     <div
-                        style={{ backgroundImage: `url(${process.env.REACT_APP_API_URL}/${JSON.parse(item.metadata).image})` }}
+                        style={{ backgroundImage: `url(${REACT_APP_API_URL}/${JSON.parse(item.metadata).image})` }}
                         className={styles.card_image}
                         onClick={() => setOpen(true)}
                     />
@@ -96,7 +90,7 @@ const Card = ({ className, item , data , index}) => {
                    
                     <div>
                         {
-                            isMInted == null
+                            isMInted == false
                             ?
                                 isClickedBuyItem 
                                 ?
@@ -134,7 +128,7 @@ const Card = ({ className, item , data , index}) => {
                                     <Icon name="arrow-prev" size="30" />
                                 </SlickArrow>
                                 
-                                <img className={styles.modal_content} src={`${process.env.REACT_APP_API_URL}/${JSON.parse(data[openedMediaIndex].metadata).image}`} />
+                                <img className={styles.modal_content} src={`${REACT_APP_API_URL}/${JSON.parse(data[openedMediaIndex].metadata).image}`} />
                                 
                                 <SlickArrow 
                                     className={styles.btn_next}
