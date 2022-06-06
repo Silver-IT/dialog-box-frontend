@@ -15,6 +15,7 @@ import tokenManagerContractABI from "../../../config/abis/artTokenManager.json";
 import { API_URL } from "../../../utils/constants";
 import Loader from "../../../components/Loader";
 import { Toast } from "react-bootstrap";
+import { UPDATE_COLLECTION } from "../../../store/types";
 
 const Collection = () => {
   const dispatch = useDispatch();
@@ -76,7 +77,7 @@ const Collection = () => {
   };
 
   const removeImage = () => {
-    Actions.removeImage(imageUrl);
+    // Actions.removeImage(imageUrl);
     setImageUrl("");
     setFile(null);
   };
@@ -124,10 +125,10 @@ const Collection = () => {
       });
   };
 
-  const update = (collection) => {
-    setVisibleUpdateModal(true);
-    // setImageUrl(collection.init_logo_uri);
+  const updateItem = (collection) => {
+    setImageUrl(collection.init_logo_uri);
     setUpdatingCollection(collection);
+    setVisibleUpdateModal(true);
   };
 
   const updateCollection = () => {
@@ -137,11 +138,18 @@ const Collection = () => {
 
       Actions.updateCollection(tempCollection, auth)
         .then((response) => {
+          dispatch({
+            type: UPDATE_COLLECTION,
+            payload: {
+              address: tempCollection.address,
+              new_logo_uri: tempCollection.init_logo_uri
+            },
+          });
           toast.success("Updated successfully", toastOptions);
           resetUpdateModal();
         })
         .catch((error) => {
-          toast.success(error.message, toastOptions);
+          toast.error(error.message, toastOptions);
           resetUpdateModal();
         });
     }
@@ -205,7 +213,7 @@ const Collection = () => {
             <div className={styles.car_btns}>
               <button
                 className={cn("button-small button-stroke")}
-                onClick={() => update(item)}
+                onClick={() => updateItem(item)}
               >
                 Update
               </button>

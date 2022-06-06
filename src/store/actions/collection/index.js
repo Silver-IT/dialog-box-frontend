@@ -60,6 +60,7 @@ export const updateCollection = async (collection, auth) => {
     artTokenContractABI.abi,
     collection.address
   );
+
   return _Contract.methods
     .setLogoURI(collection.init_logo_uri)
     .send({ from: auth.authAddress });

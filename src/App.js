@@ -28,6 +28,7 @@ import { getChainId } from "./utils/common";
 
 function App() {
   const auth = useSelector((state) => state.authReducer);
+  const collectionArray = useSelector((state) => state.collectionReducer.collections);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -77,6 +78,7 @@ function App() {
 
       Actions.addNewCollection(new_collection, dispatch);
     });
+
   }, []);
 
   const isAdminOrOwner = () => {
