@@ -14,24 +14,24 @@ import TextInput from "../../components/TextInput";
 import Loader from "../../components/Loader";
 import Preview from "./Preview";
 import Dropzone from "react-dropzone";
+import { SAVE_NEW_NFT, GET_NFTS } from "../../store/types";
 
 const royaltiesOptions = [
   {
     id: 1,
-    name: 5
+    name: 5,
   },
   {
     id: 2,
-    name: 10
+    name: 10,
   },
   {
     id: 3,
-    name: 15
-  }
+    name: 15,
+  },
 ];
 
 const CreateDetails = () => {
-
   const dispatch = useDispatch();
 
   const web3 = new Web3(Web3.givenProvider);
@@ -48,10 +48,9 @@ const CreateDetails = () => {
   const [collectionAddress, setCollectionAddress] = useState(0);
   const [collections, setCollections] = useState([]);
 
-  const [isClickedCreateItem, setIsClickedCreateItem] = useState(false);
+  const [isNFTSaveProcessing, setIsNFTSaveProcessing] = useState(false);
 
-  const auth = useSelector(state => state.authReducer.data);
-  const collectionData = useSelector(state => state.collectionReducer.data);
+  const collectionData = useSelector((state) => state.collectionReducer.collections);
 
   const onDrop = async (files) => {
     try {
@@ -61,12 +60,27 @@ const CreateDetails = () => {
         var formData = new FormData();
         formData.append("file", uploadedFile);
 
-        let url = await Actions.uploadImage(formData);
-        setImageUrl(url);
-        setFile(uploadedFile);
-        setIsUploaded(true);
+        Actions.uploadImage(formData)
+          .then((response) => {
+            let url = response.data.file;
+            setImageUrl(url);
+            setFile(uploadedFile);
+            setIsUploaded(true);
+          })
+          .catch((error) => {
+            if (error.response) {
+              toast.error("Server Error", toastOptions);
+            } else if (error.request) {
+              toast.error("Server is not responding", toastOptions);
+            } else {
+              toast.error(error.message, toastOptions);
+            }
+          });
       } else {
-        toast.warn("This is not image. Please upload only image!", toastOptions);
+        toast.warn(
+          "This is not image. Please upload only image!",
+          toastOptions
+        );
       }
     } catch (error) {
       toast.error(error.message, toastOptions);
@@ -74,7 +88,6 @@ const CreateDetails = () => {
   };
 
   const formValidation = () => {
-
     let formIsValid = true;
     if (!file) {
       formIsValid = false;
@@ -98,7 +111,7 @@ const CreateDetails = () => {
   useEffect(() => {
     if (collectionData.length > 0) {
       var array = [];
-      collectionData.map(item => {
+      collectionData.map((item) => {
         array.push({ id: item.address, name: item.title });
       });
       setCollections(array);
@@ -106,41 +119,58 @@ const CreateDetails = () => {
   }, [collectionData]);
 
   useEffect(() => {
-    let col_address = collectionData.filter(item => item.title === property)[0]?.address;
+    let col_address = collectionData.filter(
+      (item) => item.title === property
+    )[0]?.address;
     setCollectionAddress(col_address);
   }, [property]);
 
-  const mintNewNFT = async () => {
+  const saveNewNFT = async () => {
     if (formValidation()) {
-      setIsClickedCreateItem(true);
-      try {
+      setIsNFTSaveProcessing(true);
 
-        const metadata = {
-          image: imageUrl,
-          name: name,
-          description: description,
-          attributes: {}
-        }
+      const metadata = {
+        image: imageUrl,
+        name: name,
+        description: description,
+        attributes: {},
+      };
 
-        const nftData = {
-          metadata_id: web3.utils.randomHex(32),
-          token_id: "",
-          collection_address: collectionAddress,
-          royalty_fraction: royalty * 100,
-          created_at: Date.now(),
-          metadata: JSON.stringify(metadata)
-        }
+      const nftData = {
+        metadata_id: web3.utils.randomHex(32),
+        token_id: "",
+        collection_address: collectionAddress,
+        royalty_fraction: royalty * 100,
+        created_at: Date.now(),
+        metadata: JSON.stringify(metadata),
+      };
 
-        dispatch(Actions.saveNFT(nftData));
-        toast.success("Saved Successfully!", toastOptions);
-        setIsClickedCreateItem(false);
+      Actions.saveNFT(nftData)
+        .then((response) => {
+          if (response.data.success) {
+            dispatch({
+              type: SAVE_NEW_NFT,
+              payload: {
+                success: true,
+              },
+            });
+          }
+          toast.success(response.data.message, toastOptions);
+          setIsNFTSaveProcessing(false);
+        })
+        .catch((error) => {
+          if (error.response) {
+            toast.error("Server Error", toastOptions);
+          } else if (error.request) {
+            toast.error("Server is not responding", toastOptions);
+          } else {
+            toast.error(error.message, toastOptions);
+          }
 
-      } catch (error) {
-        toast.error(error.message, toastOptions);
-        Actions.removeImage(imageUrl);
-        setImageUrl("");
-        setIsClickedCreateItem(false);
-      }
+          Actions.removeImage(imageUrl);
+          setImageUrl("");
+          setIsNFTSaveProcessing(false);
+        });
     }
   };
 
@@ -153,7 +183,10 @@ const CreateDetails = () => {
               Create single collectible
             </div>
             <button
-              className={cn("button-stroke button-small disabled", styles.button)}
+              className={cn(
+                "button-stroke button-small disabled",
+                styles.button
+              )}
             >
               Switch to Multiple
             </button>
@@ -241,38 +274,32 @@ const CreateDetails = () => {
               </div>
             </div>
             <div className={styles.foot}>
-              {
-                isClickedCreateItem ? (
-                  <button
-                    disabled
-                    className={cn("button", styles.button)}
-                    type="button"
-                  >
-                    <span>Creating...</span>
-                    <Loader className={styles.loader} color="white" />
-                  </button>
-                ) : (
-                  <button
-                    className={cn("button", styles.button)}
-                    onClick={mintNewNFT}
-                    type="button"
-                  >
-                    <span>Create Item</span>
-                    <Icon name="arrow-next" size="10" />
-                  </button>
-                )
-              }
+              {isNFTSaveProcessing ? (
+                <button
+                  disabled
+                  className={cn("button", styles.button)}
+                  type="button"
+                >
+                  <span>Creating...</span>
+                  <Loader className={styles.loader} color="white" />
+                </button>
+              ) : (
+                <button
+                  className={cn("button", styles.button)}
+                  onClick={saveNewNFT}
+                  type="button"
+                >
+                  <span>Create Item</span>
+                  <Icon name="arrow-next" size="10" />
+                </button>
+              )}
             </div>
           </form>
         </div>
-        <Preview
-          isUploaded={isUploaded}
-          previewSrc={imageUrl}
-          name={name}
-        />
+        <Preview isUploaded={isUploaded} previewSrc={imageUrl} name={name} />
         <ToastContainer />
-      </div >
-    </div >
+      </div>
+    </div>
   );
 };
 

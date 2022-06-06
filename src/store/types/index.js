@@ -1,8 +1,12 @@
 export const GET_COLLECTIONS = "GET COLLECTIONS";
 export const ADD_NEW_COLLECTION = "ADD NEW COLLECTION";
+export const UPDATE_COLLECTION = "UPDATE COLLECTION";
 export const SAVE_NEW_NFT = "SAVE NEW NFT";
 export const GET_NFTS = "GET NFTS";
 export const GET_ABOUTUS = "GET ABOUTUS";
 export const GET_CHARITY = "GET CHARITY";
+export const GET_FAQ = "GET FAQ";
+export const GET_TERMS = "GET TERMS";
 export const GET_AUTH = "GET AUTH";
 export const GET_ALL_ADMINS = "GET ALL ADMINS";
+export const GET_MINT_PRICE = "GET MINT PRICE";

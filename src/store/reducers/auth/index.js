@@ -1,10 +1,8 @@
 import { GET_AUTH } from "../../types";
 
 const INITIAL_STATE = {
-    data: {
-        authAddress: null,
-        accountType: null
-    }
+    authAddress: null,
+    accountType: null
 };
 
 export const authReducer = (state = INITIAL_STATE, action) => {

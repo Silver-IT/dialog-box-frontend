@@ -15,7 +15,7 @@ const Hero = () => {
 
   const [visibleModalBid, setVisibleModalBid] = useState(false);
 
-  const collections = useSelector(state => state.collectionReducer.data);
+  const collections = useSelector(state => state.collectionReducer.collections);
 
   const settings = {
     speed: 500,

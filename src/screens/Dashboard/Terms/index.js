@@ -6,10 +6,10 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { toastOptions } from "../../../utils/toast";
 import cn from "classnames";
-import styles from "./Aboutus.module.sass";
-import { API_URL } from "../../../utils/constants.js"
+import styles from "./Terms.module.sass";
+import { API_URL }from "../../../utils/constants"
 
-const Aboutus = () => {
+const Terms = () => {
 
     const dispatch = useDispatch();
 
@@ -18,7 +18,7 @@ const Aboutus = () => {
     const data = useSelector(state => state.articleReducer.data);
 
     useEffect(() => {
-        dispatch(Actions.getAboutus());
+        dispatch(Actions.getTerms());
     }, []);
 
     useEffect(() => {
@@ -29,11 +29,10 @@ const Aboutus = () => {
 
     const save = async () => {
         try {
-            console.log(content);
             const save_data = {
                 content: content
             }
-            let res = await Actions.saveAboutus(save_data);
+            let res = await Actions.saveTerms(save_data);
             if (res) {
                 toast.success("Saved successfully!", toastOptions);
             } else {
@@ -44,18 +43,8 @@ const Aboutus = () => {
         }
     };
 
-    // const removeImage = async (e) => {
-    //     if (e.keyCode == 8 || e.keyCode == 46) {
-    //         let selectedNode = window.tinymce.activeEditor.selection.getNode();
-    //         if (selectedNode && selectedNode.nodeName == 'IMG') {
-    //             let src = 'images/article/'+selectedNode.src.split('/').slice(-1)[0];
-    //             let res = await Actions.removeImage(src);
-    //         }
-    //     }
-    // };
-
     return (
-        <div className={styles.about_container}>
+        <div className={styles.charity_container}>
             <Editor
                 apiKey="tml0yagduli6m46sog6ws2bz3o1hh6hksmxafp3b26bi74fl"
                 initialValue={`${data.length > 0 && data[0].content}`}
@@ -63,7 +52,7 @@ const Aboutus = () => {
                     height: 500,
                     menubar: false,
                     plugins: [
-                        'advlist autolink lists link image paste',
+                        'advlist autolink lists link image',
                         'charmap print preview anchor help',
                         'searchreplace visualblocks code',
                         'insertdatetime media table paste wordcount'
@@ -79,7 +68,6 @@ const Aboutus = () => {
                         success(`${API_URL}/${url}`);
                     }
                 }}
-                // onKeyDown={removeImage}
                 onChange={(e) => setContent(e.target.getContent())}
             />
             <div className={styles.save_btn_flex}>
@@ -94,4 +82,4 @@ const Aboutus = () => {
     );
 };
 
-export default Aboutus;
+export default Terms;

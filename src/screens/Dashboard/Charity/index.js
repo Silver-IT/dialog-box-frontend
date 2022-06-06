@@ -7,7 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { toastOptions } from "../../../utils/toast";
 import cn from "classnames";
 import styles from "./Charity.module.sass";
-import { REACT_APP_API_URL }from "../../../utils/constants"
+import { API_URL }from "../../../utils/constants"
 
 const Charity = () => {
 
@@ -65,7 +65,7 @@ const Charity = () => {
                         let formData = new FormData();
                         formData.append('file', blobInfo.blob(), blobInfo.filename());
                         let url = await Actions.uploadTinyMCEImage(formData);
-                        success(`${REACT_APP_API_URL}/${url}`);
+                        success(`${API_URL}/${url}`);
                     }
                 }}
                 onChange={(e) => setContent(e.target.getContent())}

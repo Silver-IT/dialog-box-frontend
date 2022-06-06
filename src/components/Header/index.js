@@ -8,6 +8,7 @@ import Icon from "../Icon";
 import Image from "../Image";
 import {connectMetaMask} from "../../utils/connectMetaMask.js"
 import { ACCOUNT_TYPE } from "../../utils/constants";
+import { alertTitleClasses } from "@mui/material";
 
 const openseaIcon = "/images/icons/opensea.svg";
 
@@ -18,12 +19,12 @@ const Headers = () => {
   const [visibleNav, setVisibleNav] = useState(false);
   const [visibleCollectionsNav, setVisibleCollectionsNav] = useState(false);
 
-  const collections = useSelector(state => state.collectionReducer.data);
-  const auth = useSelector(state => state.authReducer.data);
+  const collectionArray = useSelector(state => state.collectionReducer.collections);
+  const auth = useSelector(state => state.authReducer);
   
   useEffect(() => {
 
-    connectMetaMask(dispatch);
+    // connectMetaMask(dispatch);
     Actions.getCollections(dispatch);
 
   }, []);
@@ -34,6 +35,7 @@ const Headers = () => {
       setVisibleCollectionsNav(false);
     }
   };
+
 
   return (
     
@@ -64,7 +66,7 @@ const Headers = () => {
                 </div>
               </div>
               <div className={styles.dropdown_content}>
-                {collections.length > 0 && collections.map((item, index) => {
+                {collectionArray.length > 0 && collectionArray.map((item, index) => {
                   return <Link key={index} to={{ pathname: `/collection/${item.address}` }} className={styles.dropdown_content_item} onClick={() => { setVisibleNav(false) }}> {item.title} </Link>
                 })}
               </div>
@@ -107,7 +109,7 @@ const Headers = () => {
                 </div>
               </div>
             </div>
-            {collections.length > 0 && collections.map((item, index) => {
+            {collectionArray.length > 0 && collectionArray.map((item, index) => {
               return (
                 <Link
                   className={styles.collection_nav_link}

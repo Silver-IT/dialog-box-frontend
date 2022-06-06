@@ -50,8 +50,18 @@ const Footers = () => {
           <div className={styles.copyright}>
             Copyright © 2021 UI8 LLC. All rights reserved
           </div>
-          <div className={styles.faq}>FAQ</div>
-          <div className={styles.faq}>Terms and Conditions</div>
+          {/* <div className={styles.faq}>FAQ</div>
+          <div className={styles.faq}>Terms and Conditions</div> */}
+
+
+          <Link className={styles.faq} to="/faq">
+          FAQ
+          </Link>
+
+          <Link className={styles.faq} to="/terms">
+          Terms and Conditions
+          </Link>
+
           {/* <div className={styles.note}>
             We use cookies for better service. <a href="/#">Accept</a>
           </div> */}
