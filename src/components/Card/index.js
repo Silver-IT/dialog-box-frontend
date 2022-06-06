@@ -39,7 +39,7 @@ const Card = ({ className, item, data, index }) => {
     //remove
     // let weiPrice = await _Contract.methods.MINT_PRICE().call()
     // let number = Web3.utils.fromWei(weiPrice, 'ether');
-    if (item.token_id == null) {
+    if (item.token_id === "") {
       setIsMinted(false);
     } else {
       setIsMinted(true);
