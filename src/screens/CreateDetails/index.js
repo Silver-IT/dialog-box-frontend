@@ -14,24 +14,24 @@ import TextInput from "../../components/TextInput";
 import Loader from "../../components/Loader";
 import Preview from "./Preview";
 import Dropzone from "react-dropzone";
+import { SAVE_NEW_NFT, GET_NFTS } from "../../store/types";
 
 const royaltiesOptions = [
   {
     id: 1,
-    name: 5
+    name: 5,
   },
   {
     id: 2,
-    name: 10
+    name: 10,
   },
   {
     id: 3,
-    name: 15
-  }
+    name: 15,
+  },
 ];
 
 const CreateDetails = () => {
-
   const dispatch = useDispatch();
 
   const web3 = new Web3(Web3.givenProvider);
@@ -44,17 +44,13 @@ const CreateDetails = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [royalty, setRoyalty] = useState(royaltiesOptions[0].name);
-  const [price, setPrice] = useState(0);
   const [property, setProperty] = useState("");
-  const [collectionId, setCollectionId] = useState(0);
+  const [collectionAddress, setCollectionAddress] = useState(0);
   const [collections, setCollections] = useState([]);
 
-  const [idForSale, setIdForSale] = useState(0);
-  const [isMinted, setIsMinted] = useState(false);
-  const [isClickedCreateItem, setIsClickedCreateItem] = useState(false);
+  const [isNFTSaveProcessing, setIsNFTSaveProcessing] = useState(false);
 
-  const auth = useSelector(state => state.authReducer.data);
-  const collectionData = useSelector(state => state.collectionReducer.data);
+  const collectionData = useSelector((state) => state.collectionReducer.collections);
 
   const onDrop = async (files) => {
     try {
@@ -64,12 +60,27 @@ const CreateDetails = () => {
         var formData = new FormData();
         formData.append("file", uploadedFile);
 
-        let url = await Actions.uploadImage(formData);
-        setImageUrl(url);
-        setFile(uploadedFile);
-        setIsUploaded(true);
+        Actions.uploadImage(formData)
+          .then((response) => {
+            let url = response.data.file;
+            setImageUrl(url);
+            setFile(uploadedFile);
+            setIsUploaded(true);
+          })
+          .catch((error) => {
+            if (error.response) {
+              toast.error("Server Error", toastOptions);
+            } else if (error.request) {
+              toast.error("Server is not responding", toastOptions);
+            } else {
+              toast.error(error.message, toastOptions);
+            }
+          });
       } else {
-        toast.warn("This is not image. Please upload only image!", toastOptions);
+        toast.warn(
+          "This is not image. Please upload only image!",
+          toastOptions
+        );
       }
     } catch (error) {
       toast.error(error.message, toastOptions);
@@ -77,7 +88,6 @@ const CreateDetails = () => {
   };
 
   const formValidation = () => {
-
     let formIsValid = true;
     if (!file) {
       formIsValid = false;
@@ -91,18 +101,6 @@ const CreateDetails = () => {
       formIsValid = false;
       toast.warn("Description is required!", toastOptions);
     }
-    if (price === 0) {
-      formIsValid = false;
-      toast.warn("Price is required!", toastOptions);
-    }
-    if (price && !price.match(/^\s*[+-]?(\d+|\d*\.\d+|\d+\.\d*)([Ee][+-]?\d+)?\s*$/)) {
-      formIsValid = false;
-      toast.warn("Price must be number!", toastOptions);
-    }
-    if (price < 0) {
-      formIsValid = false;
-      toast.warn("Price must be greater than zero!", toastOptions);
-    }
     if (!property) {
       formIsValid = false;
       toast.warn("Property is required!", toastOptions);
@@ -113,71 +111,66 @@ const CreateDetails = () => {
   useEffect(() => {
     if (collectionData.length > 0) {
       var array = [];
-      collectionData.map(item => {
-        array.push({ id: item.collectionId, name: item.title });
+      collectionData.map((item) => {
+        array.push({ id: item.address, name: item.title });
       });
       setCollections(array);
     }
   }, [collectionData]);
 
   useEffect(() => {
-    let col_id = collectionData.filter(item => item.title === property)[0]?.collectionId;
-    setCollectionId(col_id);
+    let col_address = collectionData.filter(
+      (item) => item.title === property
+    )[0]?.address;
+    setCollectionAddress(col_address);
   }, [property]);
 
-  useEffect(() => {
-    if (isMinted && idForSale) {
-      const nftData = {
-        url: imageUrl,
-        idForSale: idForSale,
-        collectionId: collectionId,
-        name: name,
-        owner: auth.address,
-        description: description,
-        royalty: royalty,
-        price: price,
-        property: property,
-        onSale: true
-      }
-      dispatch(Actions.saveNFT(nftData));
-    }
-  }, [isMinted, idForSale]);
-
-  const mintNewNFT = async () => {
+  const saveNewNFT = async () => {
     if (formValidation()) {
-      setIsClickedCreateItem(true);
-      try {
-        const data = {
-          nft: imageUrl,
-          collectionId: collectionId,
-          name: name,
-          owner: auth.address,
-          description: description,
-          royalty: royalty,
-          price: price,
-          property: property,
-          onSale: true
-        }
-        const uri = JSON.stringify(data);
-        let toWei = web3.utils.toWei(price, 'ether');
-        const gas = await _Contract.methods.mint(toWei, uri).estimateGas('', { from: auth.address });
-        const result = await _Contract.methods
-          .mint(toWei, uri).send({ from: auth.address, gas: gas });
+      setIsNFTSaveProcessing(true);
 
-        toast.success("Minted Successfully!", toastOptions);
-  
-        const tokenId = result.events.ItemAddedForSale.returnValues.tokenId;
+      const metadata = {
+        image: imageUrl,
+        name: name,
+        description: description,
+        attributes: {},
+      };
 
-        setIdForSale(tokenId);
-        setIsMinted(true);
-        setIsClickedCreateItem(false);
-      } catch (error) {
-        toast.error(error.message, toastOptions);
-        await Actions.removeImage(imageUrl);
-        setImageUrl("");
-        toast.success("Removed Image successfully!", toastOptions);
-        setIsClickedCreateItem(false);
-      }
+      const nftData = {
+        metadata_id: web3.utils.randomHex(32),
+        token_id: "",
+        collection_address: collectionAddress,
+        royalty_fraction: royalty * 100,
+        created_at: Date.now(),
+        metadata: JSON.stringify(metadata),
+      };
+
+      Actions.saveNFT(nftData)
+        .then((response) => {
+          if (response.data.success) {
+            dispatch({
+              type: SAVE_NEW_NFT,
+              payload: {
+                success: true,
+              },
+            });
+          }
+          toast.success(response.data.message, toastOptions);
+          setIsNFTSaveProcessing(false);
+        })
+        .catch((error) => {
+          if (error.response) {
+            toast.error("Server Error", toastOptions);
+          } else if (error.request) {
+            toast.error("Server is not responding", toastOptions);
+          } else {
+            toast.error(error.message, toastOptions);
+          }
+
+          Actions.removeImage(imageUrl);
+          setImageUrl("");
+          setIsNFTSaveProcessing(false);
+        });
     }
   };
 
@@ -190,7 +183,10 @@ const CreateDetails = () => {
               Create single collectible
             </div>
             <button
-              className={cn("button-stroke button-small disabled", styles.button)}
+              className={cn(
+                "button-stroke button-small disabled",
+                styles.button
+              )}
             >
               Switch to Multiple
             </button>
@@ -263,20 +259,8 @@ const CreateDetails = () => {
                       </div>
                     </div>
                     <div className={styles.col}>
-                      <TextInput
-                        className={styles.field}
-                        label="Price"
-                        name="Price"
-                        type="number"
-                        placeholder="e. g. Price"
-                        onChange={(e) => setPrice(e.target.value)}
-                        value={price}
-                        required
-                      />
-                    </div>
-                    <div className={styles.col}>
                       <div className={styles.field}>
-                        <div className={styles.label}>Properties</div>
+                        <div className={styles.label}>Collection</div>
                         <Dropdown
                           className={styles.dropdown}
                           value={property}
@@ -290,38 +274,32 @@ const CreateDetails = () => {
               </div>
             </div>
             <div className={styles.foot}>
-              {
-                isClickedCreateItem ? (
-                  <button
-                    disabled
-                    className={cn("button", styles.button)}
-                    type="button"
-                  >
-                    <span>Creating...</span>
-                    <Loader className={styles.loader} color="white" />
-                  </button>
-                ) : (
-                  <button
-                    className={cn("button", styles.button)}
-                    onClick={mintNewNFT}
-                    type="button"
-                  >
-                    <span>Create Item</span>
-                    <Icon name="arrow-next" size="10" />
-                  </button>
-                )
-              }
+              {isNFTSaveProcessing ? (
+                <button
+                  disabled
+                  className={cn("button", styles.button)}
+                  type="button"
+                >
+                  <span>Creating...</span>
+                  <Loader className={styles.loader} color="white" />
+                </button>
+              ) : (
+                <button
+                  className={cn("button", styles.button)}
+                  onClick={saveNewNFT}
+                  type="button"
+                >
+                  <span>Create Item</span>
+                  <Icon name="arrow-next" size="10" />
+                </button>
+              )}
             </div>
           </form>
         </div>
-        <Preview
-          isUploaded={isUploaded}
-          previewSrc={imageUrl}
-          name={name}
-        />
+        <Preview isUploaded={isUploaded} previewSrc={imageUrl} name={name} />
         <ToastContainer />
-      </div >
-    </div >
+      </div>
+    </div>
   );
 };
 

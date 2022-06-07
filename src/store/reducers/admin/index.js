@@ -8,7 +8,6 @@ export const adminReducer = (state = INITIAL_STATE, action) => {
     switch (action.type) {
         case GET_ALL_ADMINS:
             return {
-                ...state,
                 ...action.payload
             };
     

@@ -2,17 +2,17 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import * as Actions from "../../store/actions";
 import cn from "classnames";
-import styles from "./Faq.module.sass";
+import styles from "./Terms.module.sass";
 import parse from "html-react-parser";
 
-const Faq = () => {
+const Terms = () => {
 
     const dispatch = useDispatch();
 
     const data = useSelector(state => state.articleReducer.data);
 
     useEffect(() => {
-        dispatch(Actions.getFaq());
+        dispatch(Actions.getTerms());
     }, []);
 
     return (
@@ -24,4 +24,4 @@ const Faq = () => {
     )
 }
 
-export default Faq;
+export default Terms;

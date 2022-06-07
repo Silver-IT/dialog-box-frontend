@@ -15,7 +15,7 @@ const Hero = () => {
 
   const [visibleModalBid, setVisibleModalBid] = useState(false);
 
-  const collections = useSelector(state => state.collectionReducer.data);
+  const collections = useSelector(state => state.collectionReducer.collections);
 
   const settings = {
     speed: 500,
@@ -50,7 +50,7 @@ const Hero = () => {
                       <div className={styles.btns}>
                         <Link
                           className={cn("button", styles.button)}
-                          to={`/collection/${item.collectionId}`}
+                          to={`/collection/${item.address}`}
                         >
                           Open Gallery
                         </Link>

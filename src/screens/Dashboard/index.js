@@ -5,6 +5,8 @@ import "react-tabs/style/react-tabs.css";
 import styles from "./Dashboard.module.sass";
 import Aboutus from "./Aboutus";
 import Charity from "./Charity";
+import Faq from "./Faq";
+import Terms from "./Terms";
 import Admin from "./Admin";
 import Collection from "./Collection";
 
@@ -21,6 +23,12 @@ const Dashboard = () => {
                             <a className={styles.dashboard_font}>Charity</a>
                         </Tab>
                         <Tab>
+                            <a className={styles.dashboard_font}>Faq</a>
+                        </Tab>
+                        <Tab>
+                            <a className={styles.dashboard_font}>Terms and Conditions</a>
+                        </Tab>
+                        <Tab>
                             <a className={styles.dashboard_font}>Admin</a>
                         </Tab>
                         <Tab>
@@ -33,6 +41,12 @@ const Dashboard = () => {
                     </TabPanel>
                     <TabPanel>
                         <Charity />
+                    </TabPanel>
+                    <TabPanel>
+                        <Faq />
+                    </TabPanel>
+                    <TabPanel>
+                        <Terms />
                     </TabPanel>
                     <TabPanel>
                         <Admin />

@@ -1,6 +1,7 @@
 import React from "react";
 import cn from "classnames";
 import styles from "./Preview.module.sass";
+import { API_URL }from "../../../utils/constants"
 
 const Preview = ({ isUploaded, previewSrc, name }) => {
   return (
@@ -10,7 +11,7 @@ const Preview = ({ isUploaded, previewSrc, name }) => {
         <div className={styles.card}>
           <div className={styles.preview}>
             {
-              isUploaded && <div className={styles.preview_img} style={{ backgroundImage: `url(${process.env.REACT_APP_API_URL}/${previewSrc})` }}></div>
+              isUploaded && <div className={styles.preview_img} style={{ backgroundImage: `url(${API_URL}/${previewSrc})` }}></div>
             }
           </div>
           <div className={styles.link}>

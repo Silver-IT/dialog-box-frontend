@@ -6,6 +6,9 @@ import cn from "classnames";
 import styles from "./Header.module.sass";
 import Icon from "../Icon";
 import Image from "../Image";
+import {connectMetaMask} from "../../utils/connectMetaMask.js"
+import { ACCOUNT_TYPE } from "../../utils/constants";
+import { alertTitleClasses } from "@mui/material";
 
 const openseaIcon = "/images/icons/opensea.svg";
 
@@ -15,37 +18,15 @@ const Headers = () => {
 
   const [visibleNav, setVisibleNav] = useState(false);
   const [visibleCollectionsNav, setVisibleCollectionsNav] = useState(false);
-  const [state, setState] = useState(false);
 
-  console.log("connection state:", state);
-
-  const auth = useSelector(state => state.authReducer.data);
-  const collections = useSelector(state => state.collectionReducer.data);
-
+  const collectionArray = useSelector(state => state.collectionReducer.collections);
+  const auth = useSelector(state => state.authReducer);
+  
   useEffect(() => {
-    dispatch(Actions.getCollections());
-    if (typeof window.ethereum !== 'undefined') {
-      window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
-        console.log("eth_accounts:", accounts);
-        if (accounts.length > 0) {
-          const address = accounts[0].toUpperCase();
-          dispatch(Actions.getAuth(address));
-          setState(true);
-        } else {
-          setState(false);
-        }
-      })
-      window.ethereum.on('accountsChanged', function (accounts) {
-        console.log("accountsChanged:", accounts);
-        if (accounts.length === 0) {
-          setState(false);
-        } else {
-          const address = accounts[0].toUpperCase();
-          dispatch(Actions.getAuth(address));
-          setState(true);
-        }
-      })
-    }
+
+    // connectMetaMask(dispatch);
+    Actions.getCollections(dispatch);
+
   }, []);
 
   const setVisableNavBar = () => {
@@ -55,7 +36,9 @@ const Headers = () => {
     }
   };
 
+
   return (
+    
     <header className={styles.header}>
       <div className={cn("container", styles.container)}>
         <Link className={styles.logo} to="/" onClick={() => { setVisibleNav(false) }}>
@@ -83,8 +66,8 @@ const Headers = () => {
                 </div>
               </div>
               <div className={styles.dropdown_content}>
-                {collections.length > 0 && collections.map((item, index) => {
-                  return <Link key={index} to={{ pathname: `/collection/${item.collectionId}` }} className={styles.dropdown_content_item} onClick={() => { setVisibleNav(false) }}> {item.title} </Link>
+                {collectionArray.length > 0 && collectionArray.map((item, index) => {
+                  return <Link key={index} to={{ pathname: `/collection/${item.address}` }} className={styles.dropdown_content_item} onClick={() => { setVisibleNav(false) }}> {item.title} </Link>
                 })}
               </div>
             </div>
@@ -95,9 +78,9 @@ const Headers = () => {
               Charity
             </Link>
             {
-              state && Object.keys(auth).length > 0 && auth.address !== 'undefined'
+              auth.authAddress
                 ?
-                auth.role === "admin"
+                auth.accountType == ACCOUNT_TYPE.ADMIN || auth.accountType == ACCOUNT_TYPE.OWNER
                   ?
                   <>
                     <Link className={styles.link} to="/dashboard" onClick={() => { setVisibleNav(false) }}>
@@ -126,7 +109,7 @@ const Headers = () => {
                 </div>
               </div>
             </div>
-            {collections.length > 0 && collections.map((item, index) => {
+            {collectionArray.length > 0 && collectionArray.map((item, index) => {
               return (
                 <Link
                   className={styles.collection_nav_link}
@@ -144,9 +127,9 @@ const Headers = () => {
           </nav>
         </div>
         {
-          state && Object.keys(auth).length > 0 && auth.address !== 'undefined'
+          auth.authAddress
             ?
-            auth.role === "admin"
+            auth.accountType == ACCOUNT_TYPE.ADMIN || auth.accountType == ACCOUNT_TYPE.OWNER
               ?
               <>
                 <Link className={cn("button-stroke button-small", styles.button)} to="/dashboard" onClick={setVisableNavBar}>Dashboard</Link>
@@ -160,12 +143,12 @@ const Headers = () => {
         <ul className={styles.social}>
           <li>
             <a href="https://twitter.com/dialogboxNFT" target="_blank">
-              <Icon name="twitter" fill="#E9ECEF" size={30} viewBoxAttribute = "0 0 17 17" />
+              <Icon name="twitter" fill="#DADDE0" size={30} viewBoxAttribute = "0 0 17 17" />
             </a>
           </li>
           <li>
             <a href="https://www.instagram.com/dialogbox_nft/" target="_blank">
-              <Icon name="instagram" fill="#E9ECEF" size={30} viewBoxAttribute = "0 0 17 17" />
+              <Icon name="instagram" fill="#DADDE0" size={30} viewBoxAttribute = "0 0 17 17" />
             </a>
           </li>
           <li>

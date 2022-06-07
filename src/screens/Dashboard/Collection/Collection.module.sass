@@ -1,5 +1,13 @@
 @import ../../../styles/helpers
 
+body 
+  --overflow: auto;
+
+$bodyOverflow: var(--overflow)
+
+body
+    overflow: $bodyOverflow
+
 .table_container
     width: 100%
     min-height: 540px
@@ -218,10 +226,10 @@
         fill: $neutrals3
 
 .fieldset
-    margin-top: 20px
+    margin-top: 10px
     .field
         &:not(:last-child)
-            margin-bottom: 20px
+            margin-bottom: 10px
 
 .modal_btns
     display: flex
