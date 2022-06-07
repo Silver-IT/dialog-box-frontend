@@ -1,5 +1,13 @@
 @import ../../../styles/helpers
 
+body 
+  --overflow: auto;
+
+$bodyOverflow: var(--overflow)
+
+body
+    overflow: $bodyOverflow
+
 .table_container
     width: 100%
     min-height: 540px

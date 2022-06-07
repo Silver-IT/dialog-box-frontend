@@ -36,9 +36,6 @@ const Card = ({ className, item, data, index }) => {
   );
 
   useEffect(async () => {
-    //remove
-    // let weiPrice = await _Contract.methods.MINT_PRICE().call()
-    // let number = Web3.utils.fromWei(weiPrice, 'ether');
     if (item.token_id === "") {
       setIsMinted(false);
     } else {
@@ -56,18 +53,18 @@ const Card = ({ className, item, data, index }) => {
     try {
       _Contract.methods
         .publicMint(data.metadata_id, data.royalty_fraction)
-        .send(
-          { from: auth.authAddress, value: Web3.utils.toWei(price, "ether") },
-          function (err, transactionHash) {
-            if (!err) {
-              setIsMinted(true);
-              toast.success("Success!", toastOptions);
-            } else {
-              toast.error(err.message, toastOptions);
-            }
-            setIsMinting(false);
-          }
-        );
+        .send({ from: auth.authAddress, value: Web3.utils.toWei(price, "ether")})
+        .then(response => {
+          console.log(response);
+          setIsMinted(true);
+          toast.success("Success!", toastOptions);
+          setIsMinting(false);
+        })
+        .catch(error => {
+          toast.error(error.message, toastOptions);
+          setIsMinting(false);
+        });
+
     } catch (error) {
       console.log(error, "===error");
       toast.info(error, toastOptions);

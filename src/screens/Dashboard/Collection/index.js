@@ -7,7 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { toastOptions } from "../../../utils/toast";
 import cn from "classnames";
 import Dropzone from "react-dropzone";
-import Icon from "../../../components/Icon";
+// import Icon from "../../../components/Icon";
 import styles from "./Collection.module.sass";
 import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
 import Web3 from "web3";
@@ -16,6 +16,10 @@ import { API_URL } from "../../../utils/constants";
 import Loader from "../../../components/Loader";
 import { Toast } from "react-bootstrap";
 import { UPDATE_COLLECTION } from "../../../store/types";
+import Icon from 'react-icons-kit';
+import {ic_close} from 'react-icons-kit/md/ic_close'
+import {ic_cloud_queue_outline} from 'react-icons-kit/md/ic_cloud_queue_outline'
+
 
 const Collection = () => {
   const dispatch = useDispatch();
@@ -31,7 +35,7 @@ const Collection = () => {
   const [title, setTitle] = useState("");
   const [symbol, setSymbol] = useState("");
   const [initBaseURI, setInitBaseURI] = useState(
-    API_URL + "/collection/token/"
+    API_URL + "/collection/undefined/token/"
   );
   const [maxSupply, setMaxSupply] = useState("");
   const [mintPrice, setMintPrice] = useState("");
@@ -47,6 +51,7 @@ const Collection = () => {
 
   useEffect(() => {
     Actions.getCollections(dispatch);
+    
   }, []);
 
   const onDrop = async (files) => {
@@ -164,6 +169,7 @@ const Collection = () => {
 
   const resetInputFields = () => {
     setVisibleAddModal(false);
+    document.body.style.setProperty('--overflow', 'auto');
     setIsSaving(false);
     setFile(null);
     setImageUrl("");
@@ -176,6 +182,7 @@ const Collection = () => {
 
   const cancelAdd = () => {
     setVisibleAddModal(false);
+    document.body.style.setProperty('--overflow', 'auto');
 
     setFile(null);
     setImageUrl("");
@@ -190,12 +197,17 @@ const Collection = () => {
     setVisibleUpdateModal(false);
   };
 
+  const addButtonClicked = () => {
+    setVisibleAddModal(true)
+    document.body.style.setProperty('--overflow', 'hidden');
+  }
+
   return (
     <div className={styles.table_container}>
       <div className={styles.btn_position}>
         <button
           className={cn("button-small")}
-          onClick={() => setVisibleAddModal(true)}
+          onClick={() => addButtonClicked()}
         >
           Add
         </button>
@@ -208,17 +220,21 @@ const Collection = () => {
               className={styles.collection_img}
             />
           </div>
-          <div className={styles.column}>
-            <div className={cn("h4", styles.title_size)}>{item.title}</div>
-            <div className={styles.car_btns}>
-              <button
-                className={cn("button-small button-stroke")}
-                onClick={() => updateItem(item)}
-              >
-                Update
-              </button>
-            </div>
-          </div>
+            <div className={styles.column}>
+              <div className={cn("h4", styles.title_size)}>{item.title}</div>
+              <div className={styles.car_btns}>
+              
+              {item.owner.toLowerCase() == auth.authAddress.toLowerCase() ? 
+                <button
+                  className={cn("button-small button-stroke")}
+                  onClick={() => updateItem(item)}
+                >
+                  Update
+                </button>
+                : null 
+              }
+              </div>
+            </div> 
         </div>
       ))}
       <div></div>
@@ -238,7 +254,9 @@ const Collection = () => {
                       style={{ backgroundImage: `url(${API_URL}/${imageUrl})` }}
                     >
                       <div className={styles.close_img} onClick={removeImage}>
-                        <Icon name="close" size="25" />
+                        <div style={{ color: 'white' }}>
+                            <Icon size={20} icon={ic_close}/>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -252,7 +270,7 @@ const Collection = () => {
                       >
                         <input {...getInputProps()} className={styles.load} />
                         <div className={styles.icon}>
-                          <Icon name="upload-file" size="24" />
+                          <Icon size={20} icon={ic_cloud_queue_outline}/>
                         </div>
                         <div className={styles.format}>
                           PNG, JPG, JPEG, GIF, WEBP
@@ -359,7 +377,9 @@ const Collection = () => {
                       style={{ backgroundImage: `url(${API_URL}/${imageUrl})` }}
                     >
                       <div className={styles.close_img} onClick={removeImage}>
-                        <Icon name="close" size="25" />
+                        <div style={{ color: 'white' }}>
+                            <Icon size={20} icon={ic_close}/>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -373,7 +393,7 @@ const Collection = () => {
                       >
                         <input {...getInputProps()} className={styles.load} />
                         <div className={styles.icon}>
-                          <Icon name="upload-file" size="24" />
+                          <Icon size={20} icon={ic_cloud_queue_outline}/>
                         </div>
                         <div className={styles.format}>
                           PNG, JPG, JPEG, GIF, WEBP

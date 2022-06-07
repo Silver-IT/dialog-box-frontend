@@ -69,22 +69,21 @@ const Admin = () => {
     Actions.delAdmin(auth, address)
       .then((response) => {
         toast.success("Deleted successfully", toastOptions);
+        Actions.getAllAdmins()
+          .then((response) => {
+            dispatch({
+              type: GET_ALL_ADMINS,
+              payload: {
+                data: response,
+              },
+            });
+          })
+          .catch((error) => {
+            toast.error(error.message, toastOptions);
+          });
       })
       .catch((error) => {
         toast.success(error.message, toastOptions);
-      });
-
-    Actions.getAllAdmins()
-      .then((response) => {
-        dispatch({
-          type: GET_ALL_ADMINS,
-          payload: {
-            data: response,
-          },
-        });
-      })
-      .catch((error) => {
-        toast.error(error.message, toastOptions);
       });
   };
 

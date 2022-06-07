@@ -1,5 +1,10 @@
 import React, { useEffect } from "react";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import * as Actions from "./store/actions";
 import "./styles/app.sass";
@@ -28,7 +33,6 @@ import { getChainId } from "./utils/common";
 
 function App() {
   const auth = useSelector((state) => state.authReducer);
-  const collectionArray = useSelector((state) => state.collectionReducer.collections);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -48,6 +52,7 @@ function App() {
       // Handle the new chain.
       // Correctly handling chain changes can be complicated.
       // We recommend reloading the page unless you have good reason not to.
+      alert("Dfdf");
       window.location.reload();
     });
 
@@ -68,54 +73,71 @@ function App() {
 
       let name = await artTokenContract.methods.name().call();
       let logoURL = await artTokenContract.methods.logoURI().call();
+      let owner = await artTokenContract.methods.owner().call();
+      let address = event.returnValues._addr;
 
       const new_collection = {
         title: name,
         init_logo_uri: logoURL,
+        address: address,
+        owner: owner
       };
 
       console.log("new collection", new_collection);
 
       Actions.addNewCollection(new_collection, dispatch);
     });
-
   }, []);
 
   const isAdminOrOwner = () => {
-    return auth.accountType == ACCOUNT_TYPE.ADMIN ||
-      auth.accountType == ACCOUNT_TYPE.OWNER
-      ? true
-      : false;
+
+    if (auth.accountType == ACCOUNT_TYPE.ADMIN || auth.accountType == ACCOUNT_TYPE.OWNER){
+      return true;
+    }else{
+      return false;
+    }
+  };
+
+  const ProtectedRoute = ({ children }) => {
+    if (!isAdminOrOwner()) {
+      return <Navigate to="/" replace />;
+    } else {
+      return children;
+    }
   };
 
   return (
     <Router>
       <div className="main">
         <Header />
-        <Switch>
-          <Route exact path="/" render={() => <Home />} />
-          <Route exact path="/about" render={() => <About />} />
-          <Route exact path="/charity" render={() => <Charity />} />
-          <Route exact path="/faq" render={() => <Faq />} />
-          <Route exact path="/terms" render={() => <Terms />} />
+        <Routes>
+          <Route exact path="/" element={<Home />} />
+          <Route exact path="/about" element={<About />} />
+          <Route exact path="/charity" element={<Charity />} />
+          <Route exact path="/faq" element={<Faq />} />
+          <Route exact path="/terms" element={<Terms />} />
           <Route
             exact
             path="/dashboard"
-            render={() => (isAdminOrOwner() ? <Dashboard /> : <Home />)}
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
           />
-          <Route
-            exact
-            path="/connect-wallet"
-            render={() => <ConnectWallet />}
-          />
-          <Route exact path="/collection/:id" render={() => <Collection />} />
-          <Route exact path="/create" render={() => <CreateItem />} />
+          <Route exact path="/connect-wallet" element={<ConnectWallet />} />
+          <Route exact path="/collection/:id" element={<Collection />} />
+          <Route exact path="/create" element={<CreateItem />} />
           <Route
             exact
             path="/create-details"
-            render={() => (isAdminOrOwner() ? <CreateDetails /> : <Home />)}
+            element={
+              <ProtectedRoute>
+                <CreateDetails />
+              </ProtectedRoute>
+            }
           />
-        </Switch>
+        </Routes>
         <Footer />
       </div>
     </Router>

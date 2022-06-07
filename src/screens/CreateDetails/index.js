@@ -260,7 +260,7 @@ const CreateDetails = () => {
                     </div>
                     <div className={styles.col}>
                       <div className={styles.field}>
-                        <div className={styles.label}>Properties</div>
+                        <div className={styles.label}>Collection</div>
                         <Dropdown
                           className={styles.dropdown}
                           value={property}
