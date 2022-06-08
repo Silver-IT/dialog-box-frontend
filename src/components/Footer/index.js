@@ -52,8 +52,6 @@ const Footers = () => {
           </div>
           {/* <div className={styles.faq}>FAQ</div>
           <div className={styles.faq}>Terms and Conditions</div> */}
-
-
           <Link className={styles.faq} to="/faq">
           FAQ
           </Link>

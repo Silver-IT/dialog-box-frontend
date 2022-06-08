@@ -30,12 +30,16 @@ import Web3 from "web3";
 import artTokenContractABI from "./config/abis/artToken.json";
 import artTokenManagerContractABI from "./config/abis/artTokenManager.json";
 import { getChainId } from "./utils/common";
+require('dotenv').config();
 
 function App() {
   const auth = useSelector((state) => state.authReducer);
   const dispatch = useDispatch();
 
   useEffect(() => {
+
+    console.log("node_env", process.env.REACT_APP_NODE_ENV);
+
     checkIfLoggedIn(dispatch);
 
     window.ethereum.on("accountsChanged", function (accounts) {
