@@ -186,7 +186,7 @@ const Collection = () => {
     setFile(null);
     setImageUrl("");
     setTitle("");
-    setTitle("");
+    setInitBaseURI("");
     setSymbol("");
     setMaxSupply("");
     setMintPrice("");
@@ -204,14 +204,14 @@ const Collection = () => {
   const nameChanged = (e) => {
     setTitle(e.target.value); 
     const hashString = stringToHash(e.target.value + symbol + Date.now());
-    const baseURI = API_URL + "/collection/" + hashString + "/token/";
+    const baseURI = API_URL + "/collection/" + hashString + "/";
     setInitBaseURI(baseURI);
   }
 
   const symbolChanged = (e) => {
     setSymbol(e.target.value); 
     const hashString = stringToHash(title + e.target.value + Date.now());
-    const baseURI = API_URL + "/collection/" + hashString + "/token/";
+    const baseURI = API_URL + "/collection/" + hashString + "/";
     setInitBaseURI(baseURI);
   }
 
@@ -325,6 +325,7 @@ const Collection = () => {
                   onChange={(e) => setInitBaseURI(e.target.value)}
                   value={initBaseURI}
                   required
+                  disabled
                 />
                 <TextInput
                   className={styles.field}
