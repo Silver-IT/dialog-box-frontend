@@ -19,6 +19,7 @@ import { UPDATE_COLLECTION } from "../../../store/types";
 import Icon from 'react-icons-kit';
 import {ic_close} from 'react-icons-kit/md/ic_close'
 import {ic_cloud_queue_outline} from 'react-icons-kit/md/ic_cloud_queue_outline'
+import { stringToHash } from '../../../utils/common'
 
 
 const Collection = () => {
@@ -34,9 +35,7 @@ const Collection = () => {
 
   const [title, setTitle] = useState("");
   const [symbol, setSymbol] = useState("");
-  const [initBaseURI, setInitBaseURI] = useState(
-    API_URL + "/collection/undefined/token/"
-  );
+  const [initBaseURI, setInitBaseURI] = useState("");
   const [maxSupply, setMaxSupply] = useState("");
   const [mintPrice, setMintPrice] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -202,6 +201,20 @@ const Collection = () => {
     document.body.style.setProperty('--overflow', 'hidden');
   }
 
+  const nameChanged = (e) => {
+    setTitle(e.target.value); 
+    const hashString = stringToHash(e.target.value + symbol + Date.now());
+    const baseURI = API_URL + "/collection/" + hashString + "/token/";
+    setInitBaseURI(baseURI);
+  }
+
+  const symbolChanged = (e) => {
+    setSymbol(e.target.value); 
+    const hashString = stringToHash(title + e.target.value + Date.now());
+    const baseURI = API_URL + "/collection/" + hashString + "/token/";
+    setInitBaseURI(baseURI);
+  }
+
   return (
     <div className={styles.table_container}>
       <div className={styles.btn_position}>
@@ -291,7 +304,7 @@ const Collection = () => {
                   label="Name"
                   name="Name"
                   type="text"
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(e) => nameChanged(e) }
                   value={title}
                   required
                 />
@@ -300,7 +313,7 @@ const Collection = () => {
                   label="Symbol"
                   name="Symbol"
                   type="text"
-                  onChange={(e) => setSymbol(e.target.value)}
+                  onChange={(e) => symbolChanged(e) }
                   value={symbol}
                   required
                 />
