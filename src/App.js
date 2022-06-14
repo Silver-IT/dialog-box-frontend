@@ -36,11 +36,11 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
+  
     checkIfLoggedIn(dispatch);
 
     window.ethereum.on("accountsChanged", function (accounts) {
       if (accounts.length > 0) {
-        console.log("account changed");
         const address = accounts[0];
         checkAccountType(address, dispatch);
       } else {
@@ -63,7 +63,6 @@ function App() {
 
     //set event listener to collection deployment.
     tokenManagerContract.events.CollectionAdded().on("data", async (event) => {
-      console.log(`collection deployed: ${event.returnValues._addr}`);
 
       const artTokenContract = new web3.eth.Contract(
         artTokenContractABI.abi,
@@ -81,8 +80,6 @@ function App() {
         address: address,
         owner: owner
       };
-
-      console.log("new collection", new_collection);
 
       Actions.addNewCollection(new_collection, dispatch);
     });
