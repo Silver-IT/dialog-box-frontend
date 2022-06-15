@@ -9,4 +9,3 @@ export const GET_FAQ = "GET FAQ";
 export const GET_TERMS = "GET TERMS";
 export const GET_AUTH = "GET AUTH";
 export const GET_ALL_ADMINS = "GET ALL ADMINS";
-export const GET_MINT_PRICE = "GET MINT PRICE";

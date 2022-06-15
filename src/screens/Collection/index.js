@@ -20,15 +20,14 @@ const Collection = () => {
   const collectionArray = useSelector(state => state.collectionReducer.collections);
 
   useEffect(() => {
-    if (checkAddressValidate(collectionAddress)){
-      const collection = collectionArray.find(collection => collection.address === collectionAddress);
+    if (checkAddressValidate(collectionAddress) || collectionArray.length == 0){
+      const collection = collectionArray.find(collection => collection.address == collectionAddress);
       setCollection(collection);
-      // Actions.getMintPrice(collectionAddress, dispatch);
     }else{
       navigate('/404');
     }
       
-  }, [collectionAddress]);
+  }, [collectionAddress, collectionArray]);
 
   useEffect(() => {
     if (collectionAddress) {
