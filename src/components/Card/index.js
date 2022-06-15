@@ -116,7 +116,7 @@ const Card = ({ className, item, data, index }) => {
               </button>
             )}
           </div>
-          <div className={styles.price}>${price}</div>
+          <div className={styles.price}>{price} ETH</div>
         </div>
         <ToastContainer />
         {/* </div> */}
