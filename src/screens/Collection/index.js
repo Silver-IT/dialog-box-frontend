@@ -16,9 +16,7 @@ const Collection = () => {
   const nftArray = useSelector((state) => state.nftReducer.data);
 
   useEffect(() => {
-    // if (collectionAddress) {
       Actions.getMintPrice(collectionAddress, dispatch);
-    // }
   }, [collectionAddress]);
 
   useEffect(() => {
