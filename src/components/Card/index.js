@@ -17,18 +17,16 @@ import { API_URL } from "../../utils/constants";
 
 const web3 = new Web3(Web3.givenProvider);
 
-const Card = ({ className, item, data, index }) => {
+const Card = ({ className, item, data, collection, index }) => {
   const dispatch = useDispatch();
 
   const [open, setOpen] = useState(false);
   const [isMinting, setIsMinting] = useState(false);
   const [openedMediaIndex, setOpenedMediaIndex] = useState(0);
   const [isMInted, setIsMinted] = useState(false);
-
+  const [mintPrice, setMintPrice] = useState("");
   const scrollRef = useRef(null);
-
   const auth = useSelector((state) => state.authReducer);
-  const price = useSelector((state) => state.mintPriceReducer.data);
 
   const _Contract = new web3.eth.Contract(
     artTokenContractABI.abi,
@@ -41,7 +39,13 @@ const Card = ({ className, item, data, index }) => {
     } else {
       setIsMinted(true);
     }
-  }, []);
+
+    if(collection != null){
+      setMintPrice(Web3.utils.fromWei(collection.mint_price.toString(), "ether"))
+    }
+    
+
+  }, [collection]);
 
   useEffect(() => {
     open ? disableBodyScroll(scrollRef) : enableBodyScroll(scrollRef);
@@ -53,7 +57,7 @@ const Card = ({ className, item, data, index }) => {
     try {
       _Contract.methods
         .publicMint(data.metadata_id, data.royalty_fraction)
-        .send({ from: auth.authAddress, value: Web3.utils.toWei(price, "ether")})
+        .send({ from: auth.authAddress, value: collection.mint_price})
         .then(response => {
           console.log(response);
           setIsMinted(true);
@@ -116,7 +120,7 @@ const Card = ({ className, item, data, index }) => {
               </button>
             )}
           </div>
-          <div className={styles.price}>${price}</div>
+          <div className={styles.price}>{mintPrice} ETH</div>
         </div>
         <ToastContainer />
         {/* </div> */}

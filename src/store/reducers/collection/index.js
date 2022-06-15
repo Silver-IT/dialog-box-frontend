@@ -36,14 +36,3 @@ const MINT_PRICE_STATE = {
   data: null,
 };
 
-export const mintPriceReducer = (state = MINT_PRICE_STATE, action) => {
-  switch (action.type) {
-    case GET_MINT_PRICE:
-      return {
-        ...action.payload,
-      };
-
-    default:
-      return state;
-  }
-};

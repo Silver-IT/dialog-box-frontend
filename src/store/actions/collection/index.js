@@ -1,8 +1,7 @@
 import axios from "axios";
 import {
   GET_COLLECTIONS,
-  ADD_NEW_COLLECTION,
-  GET_MINT_PRICE,
+  ADD_NEW_COLLECTION
 } from "../../types";
 import Web3 from "web3";
 import artTokenContractABI from "../../../config/abis/artToken.json";
@@ -70,22 +69,3 @@ export const uploadCollectionImage = (formData) => {
   return axios.post(`${API_URL}/api/collection_image_upload`, formData);
 };
 
-export const getMintPrice = async (collectionAddress, dispatch) => {
-  const _Contract = new web3.eth.Contract(
-    artTokenContractABI.abi,
-    collectionAddress
-  );
-
-  try {
-    let weiPrice = await _Contract.methods.MINT_PRICE().call();
-    let number = Web3.utils.fromWei(weiPrice, "ether");
-    dispatch({
-      type: GET_MINT_PRICE,
-      payload: {
-        data: number,
-      },
-    });
-  } catch (error) {
-    toast.error(error.message, toastOptions);
-  }
-};

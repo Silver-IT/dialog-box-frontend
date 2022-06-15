@@ -319,7 +319,7 @@ const Collection = () => {
                 />
                 <TextInput
                   className={styles.field}
-                  label="initBaseURI"
+                  label="BaseURI"
                   name="initBaseURI"
                   type="text"
                   onChange={(e) => setInitBaseURI(e.target.value)}
@@ -338,7 +338,7 @@ const Collection = () => {
                 />
                 <TextInput
                   className={styles.field}
-                  label="mint Price"
+                  label="mint Price(ETH)"
                   name="mint Price"
                   type="text"
                   onChange={(e) => setMintPrice(e.target.value)}
