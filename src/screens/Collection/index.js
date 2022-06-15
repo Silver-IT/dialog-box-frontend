@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import cn from "classnames";
 import styles from "./Collection.module.sass";
 import Card from "../../components/Card";
@@ -10,13 +10,24 @@ import { ToastContainer, toast } from "react-toastify";
 import { SAVE_NEW_NFT, GET_NFTS } from "../../store/types";
 
 const Collection = () => {
+
+  const [collection, setCollection] = useState(null);
+
   const collectionAddress = useParams().id;
   const dispatch = useDispatch();
-
+  const navigate = useNavigate();
   const nftArray = useSelector((state) => state.nftReducer.data);
+  const collectionArray = useSelector(state => state.collectionReducer.collections);
 
   useEffect(() => {
-      Actions.getMintPrice(collectionAddress, dispatch);
+    if (checkAddressValidate(collectionAddress)){
+      const collection = collectionArray.find(collection => collection.address === collectionAddress);
+      setCollection(collection);
+      // Actions.getMintPrice(collectionAddress, dispatch);
+    }else{
+      navigate('/404');
+    }
+      
   }, [collectionAddress]);
 
   useEffect(() => {
@@ -42,6 +53,15 @@ const Collection = () => {
     }
   }, [collectionAddress]);
 
+  const checkAddressValidate = (addr) => {
+    let addressArray = [];
+    for(let index in collectionArray){
+      console.log(collectionArray[index]);
+      addressArray.push(collectionArray[index].address);
+    }
+    return addressArray.includes(addr)
+  }
+
   return (
     <div className={cn("section", styles.section)}>
       <div className={cn("container", styles.container)}>
@@ -57,6 +77,7 @@ const Collection = () => {
                       className={styles.card}
                       item={item}
                       data={nftArray}
+                      collection={collection}
                       index={index}
                     />
                   );

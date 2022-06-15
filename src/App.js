@@ -3,7 +3,7 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Navigate,
+  Navigate
 } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import * as Actions from "./store/actions";
@@ -30,6 +30,7 @@ import Web3 from "web3";
 import artTokenContractABI from "./config/abis/artToken.json";
 import artTokenManagerContractABI from "./config/abis/artTokenManager.json";
 import { getChainId } from "./utils/common";
+import NotFound from "./screens/NotFound"
 
 function App() {
   const auth = useSelector((state) => state.authReducer);
@@ -105,7 +106,8 @@ function App() {
   return (
     <Router>
       <div className="main">
-        <Header />
+      
+        <Header/>  
         <Routes>
           <Route exact path="/" element={<Home />} />
           <Route exact path="/about" element={<About />} />
@@ -133,6 +135,8 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route exact path="/404" element={<NotFound/>} />
+          <Route path="*" element={<NotFound/>} />
         </Routes>
         <Footer />
       </div>
