@@ -55,7 +55,6 @@ const Collection = () => {
   const checkAddressValidate = (addr) => {
     let addressArray = [];
     for(let index in collectionArray){
-      console.log(collectionArray[index]);
       addressArray.push(collectionArray[index].address);
     }
     return addressArray.includes(addr)

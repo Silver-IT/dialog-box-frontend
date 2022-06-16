@@ -40,12 +40,19 @@ const Card = ({ className, item, data, collection, index }) => {
       setIsMinted(true);
     }
 
-    if(collection != null){
-      setMintPrice(Web3.utils.fromWei(collection.mint_price.toString(), "ether"))
-    }
-    
+    if (collection != null) {
 
-  }, [collection]);
+      const mintPriceString = Web3.utils.fromWei(
+        collection.mint_price,
+        "ether"
+      );
+      const mintPriceNumber = new Intl.NumberFormat("en-GB", {
+        notation: "compact",
+      }).format(Number(mintPriceString));
+
+      setMintPrice(mintPriceNumber.toString());
+    }
+  }, [collection, item]);
 
   useEffect(() => {
     open ? disableBodyScroll(scrollRef) : enableBodyScroll(scrollRef);
@@ -57,18 +64,16 @@ const Card = ({ className, item, data, collection, index }) => {
     try {
       _Contract.methods
         .publicMint(data.metadata_id, data.royalty_fraction)
-        .send({ from: auth.authAddress, value: collection.mint_price})
-        .then(response => {
-          console.log(response);
+        .send({ from: auth.authAddress, value: collection.mint_price })
+        .then((response) => {
           setIsMinted(true);
           toast.success("Success!", toastOptions);
           setIsMinting(false);
         })
-        .catch(error => {
+        .catch((error) => {
           toast.error(error.message, toastOptions);
           setIsMinting(false);
         });
-
     } catch (error) {
       console.log(error, "===error");
       toast.info(error, toastOptions);

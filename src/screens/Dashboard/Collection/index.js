@@ -81,7 +81,7 @@ const Collection = () => {
   };
 
   const removeImage = () => {
-    // Actions.removeImage(imageUrl);
+    Actions.removeImage(imageUrl);
     setImageUrl("");
     setFile(null);
   };
@@ -101,19 +101,11 @@ const Collection = () => {
 
     setIsSaving(true);
 
-    const web3 = new Web3(Web3.givenProvider);
-    web3.eth.transactionBlockTimeout = 1000;
-
-    const _Contract = new web3.eth.Contract(
-      tokenManagerContractABI.abi,
-      process.env.REACT_APP_TOKENMANAGER_CONTRACT_ADDRESS
-    );
-
     let collection = {
       title: title,
       symbol: symbol,
-      init_logo_uri: imageUrl,
-      init_base_uri: initBaseURI,
+      logo_uri: imageUrl,
+      base_uri: initBaseURI,
       mint_price: mintPrice,
       max_supply: maxSupply,
     };
@@ -130,15 +122,15 @@ const Collection = () => {
   };
 
   const updateItem = (collection) => {
-    setImageUrl(collection.init_logo_uri);
+    setImageUrl(collection.logo_uri);
     setUpdatingCollection(collection);
     setVisibleUpdateModal(true);
   };
 
   const updateCollection = () => {
-    if (imageUrl && updatingCollection.init_logo_uri != imageUrl) {
+    if (imageUrl && updatingCollection.logo_uri != imageUrl) {
       setIsUpdating(true);
-      let tempCollection = { ...updatingCollection, init_logo_uri: imageUrl };
+      let tempCollection = { ...updatingCollection, logo_uri: imageUrl };
 
       Actions.updateCollection(tempCollection, auth)
         .then((response) => {
@@ -146,7 +138,7 @@ const Collection = () => {
             type: UPDATE_COLLECTION,
             payload: {
               address: tempCollection.address,
-              new_logo_uri: tempCollection.init_logo_uri
+              new_logo_uri: tempCollection.logo_uri
             },
           });
           toast.success("Updated successfully", toastOptions);
@@ -172,6 +164,7 @@ const Collection = () => {
     setIsSaving(false);
     setFile(null);
     setImageUrl("");
+    setInitBaseURI("");
     setTitle("");
     setTitle("");
     setSymbol("");
@@ -229,7 +222,7 @@ const Collection = () => {
         <div className={styles.collection_card} key={index}>
           <div className={styles.column}>
             <img
-              src={`${API_URL}/${item.init_logo_uri}`}
+              src={`${API_URL}/${item.logo_uri}`}
               className={styles.collection_img}
             />
           </div>
