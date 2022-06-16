@@ -45,8 +45,8 @@ export const deployCollection = async (collection, auth) => {
     .deployCollection(
       collection.title,
       collection.symbol,
-      collection.init_base_uri,
-      collection.init_logo_uri,
+      collection.base_uri,
+      collection.logo_uri,
       collection.max_supply,
       toWei
     )
@@ -61,7 +61,7 @@ export const updateCollection = async (collection, auth) => {
   );
 
   return _Contract.methods
-    .setLogoURI(collection.init_logo_uri)
+    .setLogoURI(collection.logo_uri)
     .send({ from: auth.authAddress });
 };
 

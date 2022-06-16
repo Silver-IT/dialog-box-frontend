@@ -23,7 +23,7 @@ export const collectionReducer = (state = INITIAL_STATE, action) => {
       let resultState = { ...state };
       for (let i = 0; i < resultState.collections.length; i++) {
         if (resultState.collections[i].address == action.payload.address) {
-          resultState.collections[i].init_logo_uri = action.payload.new_logo_uri;
+          resultState.collections[i].logo_uri = action.payload.new_logo_uri;
         }
       }
       return resultState;

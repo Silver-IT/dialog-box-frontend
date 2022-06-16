@@ -71,14 +71,21 @@ function App() {
       );
 
       let name = await artTokenContract.methods.name().call();
+      let symbol = await artTokenContract.methods.symbol().call();
       let logoURL = await artTokenContract.methods.logoURI().call();
+      let mintPrice = await artTokenContract.methods.MINT_PRICE().call();
+      let maxSupply = await artTokenContract.methods.MAX_SUPPLY().call();
+      let baseURI = await artTokenContract.methods.baseURI().call();
       let owner = await artTokenContract.methods.owner().call();
-      let address = event.returnValues._addr;
 
       const new_collection = {
         title: name,
-        init_logo_uri: logoURL,
-        address: address,
+        symbol: symbol,
+        logo_uri: logoURL,
+        base_uri: baseURI,
+        mint_price: mintPrice,
+        max_supply: maxSupply,
+        address: event.returnValues._addr,
         owner: owner
       };
 

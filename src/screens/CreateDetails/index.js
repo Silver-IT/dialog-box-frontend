@@ -103,7 +103,7 @@ const CreateDetails = () => {
     }
     if (!property) {
       formIsValid = false;
-      toast.warn("Property is required!", toastOptions);
+      toast.warn("Collection is required!", toastOptions);
     }
     return formIsValid;
   };
@@ -157,6 +157,7 @@ const CreateDetails = () => {
           }
           toast.success(response.data.message, toastOptions);
           setIsNFTSaveProcessing(false);
+          resetForm();
         })
         .catch((error) => {
           if (error.response) {
@@ -173,6 +174,16 @@ const CreateDetails = () => {
         });
     }
   };
+
+  const resetForm = () => {
+    setFile(null);
+    setImageUrl(null);
+    setName("");
+    setDescription("");
+    setRoyalty(royaltiesOptions[0].name);
+    setProperty("");
+    setCollectionAddress(0);
+  }
 
   return (
     <div className={cn("section", styles.section)}>
