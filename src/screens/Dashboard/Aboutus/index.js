@@ -29,7 +29,6 @@ const Aboutus = () => {
 
     const save = async () => {
         try {
-            console.log(content);
             const save_data = {
                 content: content
             }

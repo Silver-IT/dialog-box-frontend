@@ -41,11 +41,6 @@ const Card = ({ className, item, data, collection, index }) => {
     }
 
     if (collection != null) {
-      console.log(
-        "mint price",
-        typeof collection.mint_price,
-        collection.mint_price
-      );
 
       const mintPriceString = Web3.utils.fromWei(
         collection.mint_price,
@@ -71,7 +66,6 @@ const Card = ({ className, item, data, collection, index }) => {
         .publicMint(data.metadata_id, data.royalty_fraction)
         .send({ from: auth.authAddress, value: collection.mint_price })
         .then((response) => {
-          console.log(response);
           setIsMinted(true);
           toast.success("Success!", toastOptions);
           setIsMinting(false);
